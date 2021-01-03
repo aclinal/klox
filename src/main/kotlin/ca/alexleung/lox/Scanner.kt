@@ -88,26 +88,26 @@ class Scanner(private val source: String) {
         if (isAtEnd()) {
             return '\u0000'
         }
-        return source.get(current)
+        return source[current]
     }
 
     private fun peekNext(): Char {
         if (current + 1 >= source.length) {
             return '\u0000'
         }
-        return source.get(current + 1)
+        return source[current + 1]
     }
 
     private fun advance(): Char {
         current++
-        return source.get(current - 1)
+        return source[current - 1]
     }
 
     private fun match(expected: Char): Boolean {
         if (isAtEnd()) {
             return false
         }
-        if (source.get(current) != expected) {
+        if (source[current] != expected) {
             return false
         }
         current++

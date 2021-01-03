@@ -27,6 +27,7 @@ hs_err_pid*
 
 # IJ
 .idea/uiDesigner.xml
+*.iml
 
 # Build artifacts
 build/*
