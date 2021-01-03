@@ -67,8 +67,8 @@ class Scanner(private val source: String) {
                     addToken(TokenType.SLASH)
                 }
             }
-            ' ', '\r', '\r' -> {
-                // Ignore.
+            ' ', '\r', '\t' -> {
+                // Ignore whitespace.
             }
             '\n' -> line++
             '"' -> string()
@@ -118,7 +118,7 @@ class Scanner(private val source: String) {
         addToken(type, null)
     }
 
-    private fun addToken(type: TokenType, literal: Object?) {
+    private fun addToken(type: TokenType, literal: Any?) {
         val text = source.substring(start, current)
         tokens.add(Token(type, text, literal, line))
     }
@@ -144,7 +144,7 @@ class Scanner(private val source: String) {
 
         addToken(
             TokenType.NUMBER,
-            source.substring(start, current).toDouble() as Object
+            source.substring(start, current).toDouble()
         )
     }
 
@@ -188,6 +188,6 @@ class Scanner(private val source: String) {
 
         // Trim the surrounding quotes (") before storing the token.
         val value = source.substring(start + 1, current - 1)
-        addToken(TokenType.STRING, value as Object)
+        addToken(TokenType.STRING, value)
     }
 }
