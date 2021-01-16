@@ -16,6 +16,14 @@ class Lox() {
         fun report(line: Int, where: String, message: String) {
             println("[line $line] Error$where: $message")
         }
+
+        fun error(token: Token, message: String) {
+            if (token.type == TokenType.EOF) {
+                report(token.line, " at end", message)
+            } else {
+                report(token.line, " at '" + token.lexeme + "'", message)
+            }
+        }
     }
 
     fun runFile(path: String) {
@@ -42,8 +50,17 @@ class Lox() {
 
         val tokens = scanner.scanTokens();
 
-        for (token in tokens) {
-            println(token)
+        val parser = Parser(tokens)
+        val expression = parser.parse()
+
+        if (hadError) {
+            return
         }
+
+        if (expression == null) {
+            return
+        }
+
+        println(AstPrinter().print(expression))
     }
 }
