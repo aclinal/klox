@@ -3,7 +3,12 @@ Kotlin implementation of `jlox`.
 
 ## Building
 ```shell
-gradle clean shadowJar
+gradlew clean shadowJar
+```
+
+## Testing
+```shell
+gradlew test
 ```
 
 ## Running
