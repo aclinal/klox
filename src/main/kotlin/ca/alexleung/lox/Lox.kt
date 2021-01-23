@@ -6,9 +6,12 @@ import java.nio.file.Paths
 import kotlin.system.exitProcess
 
 class Lox() {
-    var hadError = false;
+    private val interpreter = Interpreter()
 
     companion object {
+        var hadError = false;
+        var hadRuntimeError = false
+
         fun error(line: Int, message: String) {
             report(line, "", message)
         }
@@ -21,8 +24,13 @@ class Lox() {
             if (token.type == TokenType.EOF) {
                 report(token.line, " at end", message)
             } else {
-                report(token.line, " at '" + token.lexeme + "'", message)
+                report(token.line, " at '${token.lexeme}'", message)
             }
+        }
+
+        fun runtimeError(error: RuntimeError) {
+            println("${error.message}\n[line ${error.token.line}]")
+            hadRuntimeError = true
         }
     }
 
@@ -33,6 +41,9 @@ class Lox() {
         // Propagate error out as an exit code.
         if (hadError) {
             exitProcess(65)
+        }
+        if (hadError) {
+            exitProcess(70)
         }
     }
 
@@ -61,6 +72,6 @@ class Lox() {
             return
         }
 
-        println(AstPrinter().print(expression))
+        interpreter.interpret(expression)
     }
 }
