@@ -14,7 +14,8 @@ class ParserTest {
         val parser = Parser(scanner.scanTokens())
         val expression = parser.parse()
         assertNotNull(expression)
+
         val expressionString = AstPrinter().print(expression!!)
-        assertEquals(expressionString, "(+ (+ some string (/ (group (+ 1.0 1.0)) 2.0)) 5.0)")
+        assertEquals("(+ (+ some string (/ (group (+ 1.0 1.0)) 2.0)) 5.0)", expressionString)
     }
 }

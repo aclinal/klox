@@ -1,6 +1,7 @@
 package ca.alexleung.lox
 
 class AstPrinter : Expr.Visitor<String> {
+    // Visits expr and prints out a string representation.
     fun print(expr: Expr): String {
         return expr.accept(this)
     }

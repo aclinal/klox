@@ -1,6 +1,5 @@
 import ca.alexleung.lox.AstPrinter
 import ca.alexleung.lox.Binary
-import ca.alexleung.lox.Expr
 import ca.alexleung.lox.Grouping
 import ca.alexleung.lox.Literal
 import ca.alexleung.lox.Token
@@ -10,12 +9,14 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class AstPrinterTest {
+    private val astPrinter = AstPrinter()
+
     @Test
     fun `prints expression`() {
-        val expression: Expr = Binary(
+        val expression = Binary(
             Unary(
                 Token(TokenType.MINUS, "-", null, 1),
-                Literal(123)
+                Literal(123.0)
             ),
             Token(TokenType.STAR, "*", null, 1),
             Grouping(
@@ -23,7 +24,7 @@ class AstPrinterTest {
             )
         )
 
-        val expressionString = AstPrinter().print(expression)
-        assertEquals(expressionString, "(* (- 123) (group 45.67))")
+        val expressionString = astPrinter.print(expression)
+        assertEquals("(* (- 123.0) (group 45.67))", expressionString)
     }
 }
