@@ -5,10 +5,32 @@ class Parser(private val tokens: List<Token>) {
 
     class ParseError : RuntimeException()
 
-    fun parse(): Expr? = try {
-        expression()
-    } catch (error: ParseError) {
-        null
+    fun parse(): List<Stmt> {
+        val statements = mutableListOf<Stmt>()
+        while (!isAtEnd()) {
+            statements.add(statement())
+        }
+        return statements
+    }
+
+    private fun statement(): Stmt {
+        if (match(TokenType.PRINT)) {
+            return printStatement()
+        }
+
+        return expressionStatement()
+    }
+
+    private fun printStatement(): Stmt {
+        val expr = expression()
+        consume(TokenType.SEMICOLON, "Expect ';' after value.")
+        return Print(expr)
+    }
+
+    private fun expressionStatement(): Stmt {
+        val expr = expression()
+        consume(TokenType.SEMICOLON, "Expect ';' after expression.")
+        return Expression(expr)
     }
 
     private fun expression(): Expr {

@@ -2,6 +2,7 @@ import ca.alexleung.lox.Binary
 import ca.alexleung.lox.Grouping
 import ca.alexleung.lox.Interpreter
 import ca.alexleung.lox.Literal
+import ca.alexleung.lox.Print
 import ca.alexleung.lox.Token
 import ca.alexleung.lox.TokenType
 import ca.alexleung.lox.Unary
@@ -21,7 +22,7 @@ class InterpreterTest {
     }
 
     @Test
-    fun `interprets arithmetic expression`() {
+    fun `interprets print statement with arithmetic`() {
         // ((-333.0 / 3.0) + 6.67) * 2.0
         val expression = Binary(
             Binary(
@@ -42,12 +43,14 @@ class InterpreterTest {
             Literal(2.0)
         )
 
-        interpreter.interpret(expression)
+        val statements = listOf(Print(expression))
+
+        interpreter.interpret(statements)
         assertEquals("-208.66", outputStreamCaptor.toString().trim())
     }
 
     @Test
-    fun `interprets logic expressions`() {
+    fun `interprets print statement with logic`() {
         // 5.0 > 4.0
         var expression = Binary(
             Literal(5.0),
@@ -55,7 +58,9 @@ class InterpreterTest {
             Literal(4.0)
         )
 
-        interpreter.interpret(expression)
+        var statements = listOf(Print(expression))
+
+        interpreter.interpret(statements)
         assertEquals("true", outputStreamCaptor.toString().trim())
 
         outputStreamCaptor.reset()
@@ -67,7 +72,9 @@ class InterpreterTest {
             Literal(4.0)
         )
 
-        interpreter.interpret(expression)
+        statements = listOf(Print(expression))
+
+        interpreter.interpret(statements)
         assertEquals("false", outputStreamCaptor.toString().trim())
     }
 }

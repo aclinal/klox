@@ -1,10 +1,11 @@
 package ca.alexleung.lox
 
-class Interpreter() : Expr.Visitor<Any?> {
-    fun interpret(expr: Expr) {
+class Interpreter() : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
+    fun interpret(stmts: List<Stmt>) {
         try {
-            val value = evaluate(expr)
-            println(stringify(value))
+            for (stmt in stmts) {
+                execute(stmt)
+            }
         } catch (error: RuntimeError) {
             Lox.runtimeError(error)
         }
@@ -85,8 +86,21 @@ class Interpreter() : Expr.Visitor<Any?> {
         }
     }
 
+    override fun visit(stmt: Expression) {
+        evaluate(stmt.expr)
+    }
+
+    override fun visit(stmt: Print) {
+        val value = evaluate(stmt.expr)
+        println(stringify(value))
+    }
+
     private fun evaluate(expr: Expr): Any? {
         return expr.accept(this)
+    }
+
+    private fun execute(stmt: Stmt) {
+        stmt.accept(this)
     }
 
     private fun isTruthy(any: Any?): Boolean {
