@@ -1,7 +1,7 @@
 package ca.alexleung.lox
 
 sealed class Stmt {
-    // Implementations of Expr.Visitor<R> define actions that can be taken on expressions.
+    // Implementations of Stmt.Visitor<R> define actions that can be taken on statements.
     interface Visitor<R> {
         fun visit(stmt: Expression): R
         fun visit(stmt: Print): R
