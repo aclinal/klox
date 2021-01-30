@@ -1,4 +1,6 @@
+import ca.alexleung.lox.Assign
 import ca.alexleung.lox.Binary
+import ca.alexleung.lox.Expression
 import ca.alexleung.lox.Grouping
 import ca.alexleung.lox.Interpreter
 import ca.alexleung.lox.Literal
@@ -81,7 +83,7 @@ class InterpreterTest {
     }
 
     @Test
-    fun `interprets variable statement then prints`() {
+    fun `interprets declaration and assignments`() {
         // 3 + 4
         val expression = Binary(
             Literal(3.0),
@@ -89,7 +91,7 @@ class InterpreterTest {
             Literal(4.0)
         )
 
-        val statements = listOf(
+        val variableStatements = listOf(
             // var myVar = 3 + 4;
             Var(Token(TokenType.IDENTIFIER, "myVar", null, 1), expression),
 
@@ -97,7 +99,21 @@ class InterpreterTest {
             Print(Variable(Token(TokenType.IDENTIFIER, "myVar", null, 2)))
         )
 
-        interpreter.interpret(statements)
+        interpreter.interpret(variableStatements)
         assertEquals("7", outputStreamCaptor.toString().trim())
+
+        outputStreamCaptor.reset()
+
+        val assignStatements = listOf(
+            // myVar = 13;
+            Expression(Assign(Token(TokenType.IDENTIFIER, "myVar", null, 3), Literal(13.0))),
+
+            // print myVar;
+            Print(Variable(Token(TokenType.IDENTIFIER, "myVar", null, 4)))
+        )
+
+        interpreter.interpret(assignStatements)
+        assertEquals("13", outputStreamCaptor.toString().trim())
+
     }
 }
