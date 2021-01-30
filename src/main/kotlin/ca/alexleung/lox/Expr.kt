@@ -7,6 +7,7 @@ sealed class Expr {
         fun visit(expr: Grouping): R
         fun visit(expr: Literal): R
         fun visit(expr: Unary): R
+        fun visit(expr: Variable): R
     }
 
     fun <R> accept(visitor: Visitor<R>): R {
@@ -15,6 +16,7 @@ sealed class Expr {
             is Grouping -> visitor.visit(this)
             is Literal -> visitor.visit(this)
             is Unary -> visitor.visit(this)
+            is Variable -> visitor.visit(this)
         }
     }
 }
@@ -30,3 +32,6 @@ data class Literal(val value: Any?) : Expr()
 
 // A unary operator that prefixes an expression (e.g., !).
 data class Unary(val operator: Token, val right: Expr) : Expr()
+
+// A variable expression statement (e.g., myVar).
+data class Variable(val name: Token) : Expr()

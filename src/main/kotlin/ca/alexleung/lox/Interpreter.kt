@@ -1,6 +1,8 @@
 package ca.alexleung.lox
 
 class Interpreter() : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
+    private val environment = Environment()
+
     fun interpret(stmts: List<Stmt>) {
         try {
             for (stmt in stmts) {
@@ -86,6 +88,10 @@ class Interpreter() : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
         }
     }
 
+    override fun visit(expr: Variable): Any? {
+        return environment.get(expr.name)
+    }
+
     override fun visit(stmt: Expression) {
         evaluate(stmt.expr)
     }
@@ -93,6 +99,13 @@ class Interpreter() : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
     override fun visit(stmt: Print) {
         val value = evaluate(stmt.expr)
         println(stringify(value))
+    }
+
+    override fun visit(stmt: Var) {
+        // Lox allows null values for uninitialized variable declarations.
+        val value = stmt.initializer?.let { evaluate(it) } ?: null
+
+        environment.define(stmt.name.lexeme, value)
     }
 
     private fun evaluate(expr: Expr): Any? {
@@ -104,10 +117,7 @@ class Interpreter() : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
     }
 
     private fun isTruthy(any: Any?): Boolean {
-        if (any == null) {
-            return false
-        }
-        return any as? Boolean ?: true
+        return any?.let { it as? Boolean ?: true } ?: false
     }
 
     private fun checkNumberOperand(operator: Token, operand: Any?) {

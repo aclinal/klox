@@ -8,9 +8,35 @@ class Parser(private val tokens: List<Token>) {
     fun parse(): List<Stmt> {
         val statements = mutableListOf<Stmt>()
         while (!isAtEnd()) {
-            statements.add(statement())
+            val declarationStatement = declaration() ?: continue
+            statements.add(declarationStatement)
         }
         return statements
+    }
+
+    private fun declaration(): Stmt? {
+        try {
+            if (match(TokenType.VAR)) {
+                return varDeclaration()
+            }
+            return statement()
+        } catch (error: ParseError) {
+            synchronize()
+            return null
+        }
+    }
+
+    private fun varDeclaration(): Stmt {
+        val name = consume(TokenType.IDENTIFIER, "Expect variable name.")
+
+        var initializer: Expr? = null
+
+        if (match(TokenType.EQUAL)) {
+            initializer = expression()
+        }
+
+        consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.")
+        return Var(name, initializer)
     }
 
     private fun statement(): Stmt {
@@ -107,6 +133,10 @@ class Parser(private val tokens: List<Token>) {
         if (match(TokenType.NUMBER, TokenType.STRING)) {
             val literal = previous().literal
             return Literal(literal)
+        }
+
+        if (match(TokenType.IDENTIFIER)) {
+            return Variable(previous())
         }
 
         if (match(TokenType.LEFT_PAREN)) {

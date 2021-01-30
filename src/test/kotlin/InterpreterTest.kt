@@ -6,6 +6,8 @@ import ca.alexleung.lox.Print
 import ca.alexleung.lox.Token
 import ca.alexleung.lox.TokenType
 import ca.alexleung.lox.Unary
+import ca.alexleung.lox.Var
+import ca.alexleung.lox.Variable
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -76,5 +78,26 @@ class InterpreterTest {
 
         interpreter.interpret(statements)
         assertEquals("false", outputStreamCaptor.toString().trim())
+    }
+
+    @Test
+    fun `interprets variable statement then prints`() {
+        // 3 + 4
+        val expression = Binary(
+            Literal(3.0),
+            Token(TokenType.PLUS, "+", null, 1),
+            Literal(4.0)
+        )
+
+        val statements = listOf(
+            // var myVar = 3 + 4;
+            Var(Token(TokenType.IDENTIFIER, "myVar", null, 1), expression),
+
+            // print myVar;
+            Print(Variable(Token(TokenType.IDENTIFIER, "myVar", null, 2)))
+        )
+
+        interpreter.interpret(statements)
+        assertEquals("7", outputStreamCaptor.toString().trim())
     }
 }
