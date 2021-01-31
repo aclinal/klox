@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test
 class ParserTest {
     @Test
     fun `valid expression statement is parsed correctly`() {
-        val source = """"some string" + (1 + 1) / 2 + 5;""";
+        val source = """"some string" + (1 + 1) / 2 + 5;"""
         val scanner = Scanner(source)
 
         val parser = Parser(scanner.scanTokens())
@@ -47,7 +47,7 @@ class ParserTest {
 
     @Test
     fun `valid print statement is parsed correctly`() {
-        val source = """print "some string" + (1 + 1) / 2 + 5;""";
+        val source = """print "some string" + (1 + 1) / 2 + 5;"""
         val scanner = Scanner(source)
 
         val parser = Parser(scanner.scanTokens())

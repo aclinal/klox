@@ -10,7 +10,7 @@ class ScannerTest {
         val source = """// this is a comment
             (( )){} // grouping stuff
             !*+-/=<> <= == // operators
-            """;
+            """
         val scanner = Scanner(source)
         val tokens = scanner.scanTokens()
         assertEquals(17, tokens.size)

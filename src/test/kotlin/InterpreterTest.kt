@@ -139,7 +139,7 @@ class InterpreterTest {
             print a;
             print b;
             print c;
-            """;
+            """
         val tokens = Scanner(source).scanTokens()
         val statements = Parser(tokens).parse()
         interpreter.interpret(statements)
