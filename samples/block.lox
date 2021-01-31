@@ -10,9 +10,9 @@ var c = "global c";
     print b;
     print c;
   }
- print a;
- print b;
- print c;
+  print a;
+  print b;
+  print c;
 }
 print a;
 print b;
