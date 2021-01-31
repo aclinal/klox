@@ -4,7 +4,9 @@ import ca.alexleung.lox.Expression
 import ca.alexleung.lox.Grouping
 import ca.alexleung.lox.Interpreter
 import ca.alexleung.lox.Literal
+import ca.alexleung.lox.Parser
 import ca.alexleung.lox.Print
+import ca.alexleung.lox.Scanner
 import ca.alexleung.lox.Token
 import ca.alexleung.lox.TokenType
 import ca.alexleung.lox.Unary
@@ -114,6 +116,45 @@ class InterpreterTest {
 
         interpreter.interpret(assignStatements)
         assertEquals("13", outputStreamCaptor.toString().trim())
+    }
 
+    @Test
+    fun `interprets block statements`() {
+        val source = """var a = "global a";
+            var b = "global b";
+            var c = "global c";
+            {
+              var a = "outer a";
+              var b = "outer b";
+              {
+                var a = "inner a";
+                print a;
+                print b;
+                print c;
+              }
+              print a;
+              print b;
+              print c;
+            }
+            print a;
+            print b;
+            print c;
+            """;
+        val tokens = Scanner(source).scanTokens()
+        val statements = Parser(tokens).parse()
+        interpreter.interpret(statements)
+
+        val output = outputStreamCaptor.toString().split('\n')
+        assertEquals("inner a", output[0].trim())
+        assertEquals("outer b", output[1].trim())
+        assertEquals("global c", output[2].trim())
+
+        assertEquals("outer a", output[3].trim())
+        assertEquals("outer b", output[4].trim())
+        assertEquals("global c", output[5].trim())
+
+        assertEquals("global a", output[6].trim())
+        assertEquals("global b", output[7].trim())
+        assertEquals("global c", output[8].trim())
     }
 }

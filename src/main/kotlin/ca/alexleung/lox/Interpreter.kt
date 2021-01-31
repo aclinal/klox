@@ -1,7 +1,7 @@
 package ca.alexleung.lox
 
 class Interpreter() : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
-    private val environment = Environment()
+    private var environment = Environment()
 
     fun interpret(stmts: List<Stmt>) {
         try {
@@ -98,6 +98,10 @@ class Interpreter() : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
         return environment.get(expr.name)
     }
 
+    override fun visit(stmt: Block) {
+        executeBlock(stmt.statements, Environment(environment))
+    }
+
     override fun visit(stmt: Expression) {
         evaluate(stmt.expr)
     }
@@ -120,6 +124,19 @@ class Interpreter() : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
 
     private fun execute(stmt: Stmt) {
         stmt.accept(this)
+    }
+
+    private fun executeBlock(statements: List<Stmt>, environment: Environment) {
+        val previous = this.environment
+        try {
+            this.environment = environment
+
+            for (statement in statements) {
+                execute(statement)
+            }
+        } finally {
+            this.environment = previous
+        }
     }
 
     private fun isTruthy(any: Any?): Boolean {
