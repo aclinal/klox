@@ -38,5 +38,5 @@ data class Print(val expr: Expr) : Stmt()
 // A variable declaration statement (e.g., var myVar = 5;).
 data class Var(val name: Token, val initializer: Expr?) : Stmt()
 
-// A while statement (e.g., while (...) {...}).
+// A while loop statement (e.g., while (...) {...}).
 data class While(val condition: Expr, val body: Stmt) : Stmt()
