@@ -22,6 +22,10 @@ class AstPrinter : Expr.Visitor<String> {
         return expr.value?.toString() ?: "nil"
     }
 
+    override fun visit(expr: Logical): String {
+        return parenthesize(expr.operator.lexeme, expr.left, expr.right)
+    }
+
     override fun visit(expr: Unary): String {
         return parenthesize(expr.operator.lexeme, expr.right)
     }

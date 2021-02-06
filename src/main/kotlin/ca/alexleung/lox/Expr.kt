@@ -7,6 +7,7 @@ sealed class Expr {
         fun visit(expr: Binary): R
         fun visit(expr: Grouping): R
         fun visit(expr: Literal): R
+        fun visit(expr: Logical): R
         fun visit(expr: Unary): R
         fun visit(expr: Variable): R
     }
@@ -17,6 +18,7 @@ sealed class Expr {
             is Binary -> visitor.visit(this)
             is Grouping -> visitor.visit(this)
             is Literal -> visitor.visit(this)
+            is Logical -> visitor.visit(this)
             is Unary -> visitor.visit(this)
             is Variable -> visitor.visit(this)
         }
@@ -34,6 +36,9 @@ data class Grouping(val expression: Expr) : Expr()
 
 // A literal, including null values.
 data class Literal(val value: Any?) : Expr()
+
+// A logical expression (e.g., (a and b)).
+data class Logical(val left: Expr, val operator: Token, val right: Expr) : Expr()
 
 // A unary operator that prefixes an expression (e.g., !).
 data class Unary(val operator: Token, val right: Expr) : Expr()

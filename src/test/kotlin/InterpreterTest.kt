@@ -181,4 +181,22 @@ class InterpreterTest {
         assertEquals("a: gt 3", output[0].trim())
         assertEquals("a: not lt 3", output[1].trim())
     }
+
+    @Test
+    fun `interprets logical operators`() {
+        val source = """print "hi" or 2;
+            print "hi" and 2;
+            print nil or "yes";
+            print nil and "yes";
+            """
+        val tokens = Scanner(source).scanTokens()
+        val statements = Parser(tokens).parse()
+        interpreter.interpret(statements)
+
+        val output = outputStreamCaptor.toString().split('\n')
+        assertEquals("hi", output[0].trim())
+        assertEquals("2", output[1].trim())
+        assertEquals("yes", output[2].trim())
+        assertEquals("nil", output[3].trim())
+    }
 }

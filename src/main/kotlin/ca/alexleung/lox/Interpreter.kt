@@ -81,6 +81,26 @@ class Interpreter() : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
         return expr.value
     }
 
+    override fun visit(expr: Logical): Any? {
+        val left = evaluate(expr.left)
+        if (expr.operator.type == TokenType.OR) {
+            if (isTruthy(left)) {
+                // Short-circuit when LHS is truthy in ORs.
+                return left
+            }
+        } else {
+            // Should always be an AND.
+            assert(expr.operator.type == TokenType.AND)
+
+            if (!isTruthy(left)) {
+                // Short-circuit when LHS is falsy in ANDs.
+                return left
+            }
+        }
+
+        return evaluate(expr.right)
+    }
+
     override fun visit(expr: Unary): Any? {
         val right = evaluate(expr.right)
 
