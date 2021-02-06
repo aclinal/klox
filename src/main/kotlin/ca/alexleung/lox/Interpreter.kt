@@ -146,6 +146,12 @@ class Interpreter() : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
         environment.define(stmt.name.lexeme, value)
     }
 
+    override fun visit(stmt: While) {
+        while (isTruthy(evaluate(stmt.condition))) {
+            execute(stmt.body)
+        }
+    }
+
     private fun evaluate(expr: Expr): Any? {
         return expr.accept(this)
     }

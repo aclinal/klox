@@ -8,6 +8,7 @@ sealed class Stmt {
         fun visit(stmt: If): R
         fun visit(stmt: Print): R
         fun visit(stmt: Var): R
+        fun visit(stmt: While): R
     }
 
     fun <R> accept(visitor: Visitor<R>): R {
@@ -17,6 +18,7 @@ sealed class Stmt {
             is If -> visitor.visit(this)
             is Print -> visitor.visit(this)
             is Var -> visitor.visit(this)
+            is While -> visitor.visit(this)
         }
     }
 }
@@ -35,3 +37,6 @@ data class Print(val expr: Expr) : Stmt()
 
 // A variable declaration statement (e.g., var myVar = 5;).
 data class Var(val name: Token, val initializer: Expr?) : Stmt()
+
+// A while statement (e.g., while (...) {...}).
+data class While(val condition: Expr, val body: Stmt) : Stmt()

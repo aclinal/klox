@@ -199,4 +199,24 @@ class InterpreterTest {
         assertEquals("yes", output[2].trim())
         assertEquals("nil", output[3].trim())
     }
+
+    @Test
+    fun `interprets while loops`() {
+        val source = """var i = 0;
+            while (i < 5) {
+              print i;
+              i = i + 1;
+            }
+            """
+        val tokens = Scanner(source).scanTokens()
+        val statements = Parser(tokens).parse()
+        interpreter.interpret(statements)
+
+        val output = outputStreamCaptor.toString().split('\n')
+        assertEquals("0", output[0].trim())
+        assertEquals("1", output[1].trim())
+        assertEquals("2", output[2].trim())
+        assertEquals("3", output[3].trim())
+        assertEquals("4", output[4].trim())
+    }
 }
