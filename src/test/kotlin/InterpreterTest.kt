@@ -157,4 +157,28 @@ class InterpreterTest {
         assertEquals("global b", output[7].trim())
         assertEquals("global c", output[8].trim())
     }
+
+    @Test
+    fun `interprets if statements`() {
+        val source = """var a = 5;
+            if (a > 3) {
+              print "a: gt 3";
+            } else {
+              print "a: not gt 3";
+            }
+            
+            if (a < 3) {
+              print "a: lt 3";
+            } else {
+              print "a: not lt 3";
+            }
+            """
+        val tokens = Scanner(source).scanTokens()
+        val statements = Parser(tokens).parse()
+        interpreter.interpret(statements)
+
+        val output = outputStreamCaptor.toString().split('\n')
+        assertEquals("a: gt 3", output[0].trim())
+        assertEquals("a: not lt 3", output[1].trim())
+    }
 }

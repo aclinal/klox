@@ -40,6 +40,10 @@ class Parser(private val tokens: List<Token>) {
     }
 
     private fun statement(): Stmt {
+        if (match(TokenType.IF)) {
+            return ifStatement()
+        }
+
         if (match(TokenType.PRINT)) {
             return printStatement()
         }
@@ -49,6 +53,17 @@ class Parser(private val tokens: List<Token>) {
         }
 
         return expressionStatement()
+    }
+
+    private fun ifStatement(): Stmt {
+        consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.")
+        val condition = expression()
+        consume(TokenType.RIGHT_PAREN, "Expect ')' after if condition.")
+
+        val thenBranch = statement()
+        val elseBranch = if (match(TokenType.ELSE)) statement() else null
+
+        return If(condition, thenBranch, elseBranch)
     }
 
     private fun printStatement(): Stmt {
