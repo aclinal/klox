@@ -21,22 +21,22 @@ sealed class Stmt {
             is While -> visitor.visit(this)
         }
     }
+
+    // A block statement, delimited by braces (e.g., { 1 + 2; }).
+    data class Block(val statements: List<Stmt>) : Stmt()
+
+    // An expression statement (e.g., 4 + 8;).
+    data class Expression(val expr: Expr) : Stmt()
+
+    // An if-else statement (e.g., if (...) {...} else {...}).
+    data class If(val condition: Expr, val thenBranch: Stmt, val elseBranch: Stmt?) : Stmt()
+
+    // A print statement (e.g., print 5;).
+    data class Print(val expr: Expr) : Stmt()
+
+    // A variable declaration statement (e.g., var myVar = 5;).
+    data class Var(val name: Token, val initializer: Expr?) : Stmt()
+
+    // A while loop statement (e.g., while (...) {...}).
+    data class While(val condition: Expr, val body: Stmt) : Stmt()
 }
-
-// A block statement, delimited by braces (e.g., { 1 + 2; }).
-data class Block(val statements: List<Stmt>) : Stmt()
-
-// An expression statement (e.g., 4 + 8;).
-data class Expression(val expr: Expr) : Stmt()
-
-// An if-else statement (e.g., if (...) {...} else {...}).
-data class If(val condition: Expr, val thenBranch: Stmt, val elseBranch: Stmt?) : Stmt()
-
-// A print statement (e.g., print 5;).
-data class Print(val expr: Expr) : Stmt()
-
-// A variable declaration statement (e.g., var myVar = 5;).
-data class Var(val name: Token, val initializer: Expr?) : Stmt()
-
-// A while loop statement (e.g., while (...) {...}).
-data class While(val condition: Expr, val body: Stmt) : Stmt()

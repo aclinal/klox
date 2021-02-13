@@ -13,13 +13,13 @@ class Interpreter() : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
         }
     }
 
-    override fun visit(expr: Assign): Any? {
+    override fun visit(expr: Expr.Assign): Any? {
         val value = evaluate(expr.value)
         environment.assign(expr.name, value)
         return value
     }
 
-    override fun visit(expr: Binary): Any? {
+    override fun visit(expr: Expr.Binary): Any? {
         val left = evaluate(expr.left)
         val right = evaluate(expr.right)
 
@@ -73,15 +73,15 @@ class Interpreter() : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
         }
     }
 
-    override fun visit(expr: Grouping): Any? {
+    override fun visit(expr: Expr.Grouping): Any? {
         return evaluate(expr.expression)
     }
 
-    override fun visit(expr: Literal): Any? {
+    override fun visit(expr: Expr.Literal): Any? {
         return expr.value
     }
 
-    override fun visit(expr: Logical): Any? {
+    override fun visit(expr: Expr.Logical): Any? {
         val left = evaluate(expr.left)
         if (expr.operator.type == TokenType.OR) {
             if (isTruthy(left)) {
@@ -101,7 +101,7 @@ class Interpreter() : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
         return evaluate(expr.right)
     }
 
-    override fun visit(expr: Unary): Any? {
+    override fun visit(expr: Expr.Unary): Any? {
         val right = evaluate(expr.right)
 
         return when (expr.operator.type) {
@@ -114,19 +114,19 @@ class Interpreter() : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
         }
     }
 
-    override fun visit(expr: Variable): Any? {
+    override fun visit(expr: Expr.Variable): Any? {
         return environment.get(expr.name)
     }
 
-    override fun visit(stmt: Block) {
+    override fun visit(stmt: Stmt.Block) {
         executeBlock(stmt.statements, Environment(environment))
     }
 
-    override fun visit(stmt: Expression) {
+    override fun visit(stmt: Stmt.Expression) {
         evaluate(stmt.expr)
     }
 
-    override fun visit(stmt: If) {
+    override fun visit(stmt: Stmt.If) {
         if (isTruthy(evaluate(stmt.condition))) {
             execute(stmt.thenBranch)
         } else if (stmt.elseBranch != null) {
@@ -134,19 +134,19 @@ class Interpreter() : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
         }
     }
 
-    override fun visit(stmt: Print) {
+    override fun visit(stmt: Stmt.Print) {
         val value = evaluate(stmt.expr)
         println(stringify(value))
     }
 
-    override fun visit(stmt: Var) {
+    override fun visit(stmt: Stmt.Var) {
         // Lox allows null values for uninitialized variable declarations.
         val value = stmt.initializer?.let { evaluate(it) } ?: null
 
         environment.define(stmt.name.lexeme, value)
     }
 
-    override fun visit(stmt: While) {
+    override fun visit(stmt: Stmt.While) {
         while (isTruthy(evaluate(stmt.condition))) {
             execute(stmt.body)
         }

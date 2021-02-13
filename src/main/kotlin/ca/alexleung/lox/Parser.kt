@@ -36,7 +36,7 @@ class Parser(private val tokens: List<Token>) {
         }
 
         consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.")
-        return Var(name, initializer)
+        return Stmt.Var(name, initializer)
     }
 
     private fun statement(): Stmt {
@@ -57,7 +57,7 @@ class Parser(private val tokens: List<Token>) {
         }
 
         if (match(TokenType.LEFT_BRACE)) {
-            return Block(block())
+            return Stmt.Block(block())
         }
 
         return expressionStatement()
@@ -82,15 +82,15 @@ class Parser(private val tokens: List<Token>) {
         consume(TokenType.RIGHT_PAREN, "Expect ')' after for clauses.")
 
         val body = if (increment != null) {
-            Block(listOf(statement(), Expression(increment)))
+            Stmt.Block(listOf(statement(), Stmt.Expression(increment)))
         } else {
             statement()
         }
 
-        val loop = While(condition ?: Literal(true), body)
+        val loop = Stmt.While(condition ?: Expr.Literal(true), body)
 
         return if (initializer != null) {
-            Block(listOf(initializer, loop))
+            Stmt.Block(listOf(initializer, loop))
         } else {
             loop
         }
@@ -104,13 +104,13 @@ class Parser(private val tokens: List<Token>) {
         val thenBranch = statement()
         val elseBranch = if (match(TokenType.ELSE)) statement() else null
 
-        return If(condition, thenBranch, elseBranch)
+        return Stmt.If(condition, thenBranch, elseBranch)
     }
 
     private fun printStatement(): Stmt {
         val expr = expression()
         consume(TokenType.SEMICOLON, "Expect ';' after value.")
-        return Print(expr)
+        return Stmt.Print(expr)
     }
 
     private fun whileStatement(): Stmt {
@@ -120,13 +120,13 @@ class Parser(private val tokens: List<Token>) {
 
         val body = statement()
 
-        return While(condition, body)
+        return Stmt.While(condition, body)
     }
 
     private fun expressionStatement(): Stmt {
         val expr = expression()
         consume(TokenType.SEMICOLON, "Expect ';' after expression.")
-        return Expression(expr)
+        return Stmt.Expression(expr)
     }
 
     private fun block(): List<Stmt> {
@@ -150,8 +150,8 @@ class Parser(private val tokens: List<Token>) {
             val equals = previous()
             val value = assignment()
 
-            if (expr is Variable) {
-                return Assign(expr.name, value)
+            if (expr is Expr.Variable) {
+                return Expr.Assign(expr.name, value)
             }
 
             error(equals, "Invalid assignment target.")
@@ -166,7 +166,7 @@ class Parser(private val tokens: List<Token>) {
         while (match(TokenType.OR)) {
             val operator = previous()
             val right = and()
-            expr = Logical(expr, operator, right)
+            expr = Expr.Logical(expr, operator, right)
         }
         return expr
     }
@@ -177,7 +177,7 @@ class Parser(private val tokens: List<Token>) {
         while (match(TokenType.AND)) {
             val operator = previous()
             val right = equality()
-            expr = Logical(expr, operator, right)
+            expr = Expr.Logical(expr, operator, right)
         }
         return expr
     }
@@ -188,7 +188,7 @@ class Parser(private val tokens: List<Token>) {
         while (match(TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL)) {
             val operator = previous()
             val right = comparison()
-            expr = Binary(expr, operator, right)
+            expr = Expr.Binary(expr, operator, right)
         }
         return expr
     }
@@ -199,7 +199,7 @@ class Parser(private val tokens: List<Token>) {
         while (match(TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL)) {
             val operator = previous()
             val right = term()
-            expr = Binary(expr, operator, right)
+            expr = Expr.Binary(expr, operator, right)
         }
         return expr
     }
@@ -210,7 +210,7 @@ class Parser(private val tokens: List<Token>) {
         while (match(TokenType.PLUS, TokenType.MINUS)) {
             val operator = previous()
             val right = factor()
-            expr = Binary(expr, operator, right)
+            expr = Expr.Binary(expr, operator, right)
         }
         return expr
     }
@@ -221,7 +221,7 @@ class Parser(private val tokens: List<Token>) {
         while (match(TokenType.STAR, TokenType.SLASH)) {
             val operator = previous()
             val right = unary()
-            expr = Binary(expr, operator, right)
+            expr = Expr.Binary(expr, operator, right)
         }
         return expr
     }
@@ -230,7 +230,7 @@ class Parser(private val tokens: List<Token>) {
         if (match(TokenType.BANG, TokenType.MINUS)) {
             val operator = previous()
             val right = unary()
-            return Unary(operator, right)
+            return Expr.Unary(operator, right)
         }
 
         return primary()
@@ -238,30 +238,30 @@ class Parser(private val tokens: List<Token>) {
 
     private fun primary(): Expr {
         if (match(TokenType.TRUE)) {
-            return Literal(true)
+            return Expr.Literal(true)
         }
 
         if (match(TokenType.FALSE)) {
-            return Literal(false)
+            return Expr.Literal(false)
         }
 
         if (match(TokenType.NIL)) {
-            return Literal(null)
+            return Expr.Literal(null)
         }
 
         if (match(TokenType.NUMBER, TokenType.STRING)) {
             val literal = previous().literal
-            return Literal(literal)
+            return Expr.Literal(literal)
         }
 
         if (match(TokenType.IDENTIFIER)) {
-            return Variable(previous())
+            return Expr.Variable(previous())
         }
 
         if (match(TokenType.LEFT_PAREN)) {
             val expr = expression()
             consume(TokenType.RIGHT_PAREN, "Expect ')' after expression")
-            return Grouping(expr)
+            return Expr.Grouping(expr)
         }
 
         throw error(peek(), "Expecting an expression.")

@@ -6,31 +6,31 @@ class AstPrinter : Expr.Visitor<String> {
         return expr.accept(this)
     }
 
-    override fun visit(expr: Assign): String {
+    override fun visit(expr: Expr.Assign): String {
         return "(= ${expr.name.lexeme} ${expr.value.accept(this)}"
     }
 
-    override fun visit(expr: Binary): String {
+    override fun visit(expr: Expr.Binary): String {
         return parenthesize(expr.operator.lexeme, expr.left, expr.right)
     }
 
-    override fun visit(expr: Grouping): String {
+    override fun visit(expr: Expr.Grouping): String {
         return parenthesize("group", expr.expression)
     }
 
-    override fun visit(expr: Literal): String {
+    override fun visit(expr: Expr.Literal): String {
         return expr.value?.toString() ?: "nil"
     }
 
-    override fun visit(expr: Logical): String {
+    override fun visit(expr: Expr.Logical): String {
         return parenthesize(expr.operator.lexeme, expr.left, expr.right)
     }
 
-    override fun visit(expr: Unary): String {
+    override fun visit(expr: Expr.Unary): String {
         return parenthesize(expr.operator.lexeme, expr.right)
     }
 
-    override fun visit(expr: Variable): String {
+    override fun visit(expr: Expr.Variable): String {
         return expr.name.lexeme
     }
 

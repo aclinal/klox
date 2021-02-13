@@ -23,25 +23,26 @@ sealed class Expr {
             is Variable -> visitor.visit(this)
         }
     }
+
+    // An assignment expression (e.g., a = 4).
+    data class Assign(val name: Token, val value: Expr) : Expr()
+
+    // A binary expression (e.g., 4 + 8).
+    data class Binary(val left: Expr, val operator: Token, val right: Expr) : Expr()
+
+    // An expression encapsulated in parentheses.
+    data class Grouping(val expression: Expr) : Expr()
+
+    // A literal, including null values.
+    data class Literal(val value: Any?) : Expr()
+
+    // A logical expression (e.g., (a and b)).
+    data class Logical(val left: Expr, val operator: Token, val right: Expr) : Expr()
+
+    // A unary operator that prefixes an expression (e.g., !).
+    data class Unary(val operator: Token, val right: Expr) : Expr()
+
+    // A variable expression statement (e.g., myVar).
+    data class Variable(val name: Token) : Expr()
+
 }
-
-// An assignment expression (e.g., a = 4).
-data class Assign(val name: Token, val value: Expr) : Expr()
-
-// A binary expression (e.g., 4 + 8).
-data class Binary(val left: Expr, val operator: Token, val right: Expr) : Expr()
-
-// An expression encapsulated in parentheses.
-data class Grouping(val expression: Expr) : Expr()
-
-// A literal, including null values.
-data class Literal(val value: Any?) : Expr()
-
-// A logical expression (e.g., (a and b)).
-data class Logical(val left: Expr, val operator: Token, val right: Expr) : Expr()
-
-// A unary operator that prefixes an expression (e.g., !).
-data class Unary(val operator: Token, val right: Expr) : Expr()
-
-// A variable expression statement (e.g., myVar).
-data class Variable(val name: Token) : Expr()
