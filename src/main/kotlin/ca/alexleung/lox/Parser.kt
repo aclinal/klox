@@ -233,7 +233,36 @@ class Parser(private val tokens: List<Token>) {
             return Expr.Unary(operator, right)
         }
 
-        return primary()
+        return call()
+    }
+
+    private fun call(): Expr {
+        var expr = primary()
+
+        // Repeatedly to parse function calls, using the previously parsed expression as the callee.
+        while (true) {
+            if (match(TokenType.LEFT_PAREN)) {
+                expr = finishCall(expr)
+            } else {
+                break
+            }
+        }
+        return expr
+    }
+
+    private fun finishCall(callee: Expr): Expr {
+        val arguments = mutableListOf<Expr>()
+        if (!check(TokenType.RIGHT_PAREN)) {
+            do {
+                // Impose a limit on Lox arguments for bytecode interpreter compatibility.
+                if (arguments.size >= 255) {
+                    error(peek(), "Can't have more than 255 arguments.")
+                }
+                arguments.add(expression())
+            } while (match(TokenType.COMMA))
+        }
+        val paren = consume(TokenType.RIGHT_PAREN, "Expect ')' after arguments.")
+        return Expr.Call(callee, paren, arguments)
     }
 
     private fun primary(): Expr {
