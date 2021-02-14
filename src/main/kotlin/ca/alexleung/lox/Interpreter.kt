@@ -171,9 +171,14 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
         println(stringify(value))
     }
 
+    override fun visit(stmt: Stmt.Return) {
+        val value = if (stmt.value != null) evaluate(stmt.value) else null
+        throw Return(value)
+    }
+
     override fun visit(stmt: Stmt.Var) {
         // Lox allows null values for uninitialized variable declarations.
-        val value = stmt.initializer?.let { evaluate(it) } ?: null
+        val value = stmt.initializer?.let { evaluate(it) }
 
         environment.define(stmt.name.lexeme, value)
     }

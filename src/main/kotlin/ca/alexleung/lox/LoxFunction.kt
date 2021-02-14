@@ -13,9 +13,14 @@ class LoxFunction(
         }
 
         // Execute the function.
-        interpreter.executeBlock(declaration.body, environment)
+        // Exceptions are used for control-flow due to the recursive
+        // nature of the klox tree-walk implementation.
+        try {
+            interpreter.executeBlock(declaration.body, environment)
+        } catch (returnValue: Return) {
+            return returnValue.value
+        }
 
-        // TODO: Return a value.
         return null
     }
 

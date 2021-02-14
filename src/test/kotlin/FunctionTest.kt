@@ -91,4 +91,44 @@ class FunctionTest {
         assertEquals("2", output[1].trim())
         assertEquals("3", output[2].trim())
     }
+
+    @Test
+    fun `functions with return statements`() {
+        val source = """
+            fun count(n) {
+              while (n < 100) {
+                if (n == 3) return n; // <--
+                n = n + 1;
+              }
+            }
+
+            print count(1);
+            """
+        val tokens = Scanner(source).scanTokens()
+        val statements = Parser(tokens).parse()
+        interpreter.interpret(statements)
+
+        val output = outputStreamCaptor.toString().split('\n')
+        assertEquals("3", output[0].trim())
+    }
+
+    @Test
+    fun `recursive functions with return statements`() {
+        val source = """
+            fun fib(n) {
+              if (n <= 1) return n;
+              return fib(n - 2) + fib(n - 1);
+            }
+
+            for (var i = 0; i < 20; i = i + 1) {
+              print fib(i);
+            }
+            """
+        val tokens = Scanner(source).scanTokens()
+        val statements = Parser(tokens).parse()
+        interpreter.interpret(statements)
+
+        val output = outputStreamCaptor.toString().split('\n')
+        assertEquals("4181", output[19].trim())
+    }
 }

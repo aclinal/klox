@@ -8,6 +8,7 @@ sealed class Stmt {
         fun visit(stmt: Function): R
         fun visit(stmt: If): R
         fun visit(stmt: Print): R
+        fun visit(stmt: Return): R
         fun visit(stmt: Var): R
         fun visit(stmt: While): R
     }
@@ -19,6 +20,7 @@ sealed class Stmt {
             is Function -> visitor.visit(this)
             is If -> visitor.visit(this)
             is Print -> visitor.visit(this)
+            is Return -> visitor.visit(this)
             is Var -> visitor.visit(this)
             is While -> visitor.visit(this)
         }
@@ -38,6 +40,9 @@ sealed class Stmt {
 
     // A print statement (e.g., print 5;).
     data class Print(val expr: Expr) : Stmt()
+
+    // A return statement (e.g., return 42;).
+    data class Return(val keyword: Token, val value: Expr?) : Stmt()
 
     // A variable declaration statement (e.g., var myVar = 5;).
     data class Var(val name: Token, val initializer: Expr?) : Stmt()
