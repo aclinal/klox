@@ -1,7 +1,19 @@
 package ca.alexleung.lox
 
-class Interpreter() : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
-    private var environment = Environment()
+class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
+    private val globals = Environment()
+    private var environment = globals
+
+    constructor() {
+        globals.define("clock", object : LoxCallable {
+            override fun arity(): Int = 0
+
+            override fun call(interpreter: Interpreter, arguments: List<Any?>): Any? =
+                System.currentTimeMillis() / 1000.0
+
+            override fun toString(): String = "<native fn>"
+        })
+    }
 
     fun interpret(stmts: List<Stmt>) {
         try {
@@ -74,14 +86,12 @@ class Interpreter() : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
     }
 
     override fun visit(expr: Expr.Call): Any? {
-        val callee = evaluate(expr.callee)
+        val function = evaluate(expr.callee)
         val arguments = expr.arguments.map { evaluate(it) }
 
-        if (expr.callee !is LoxCallable) {
-            throw RuntimeError(expr.paren, "Call only call functions and classes.")
+        if (function !is LoxCallable) {
+            throw RuntimeError(expr.paren, "Can only call functions and classes.")
         }
-
-        val function = callee as LoxCallable
 
         if (arguments.size != function.arity()) {
             throw RuntimeError(expr.paren, "Expected ${function.arity()} arguments but got ${arguments.size}.")
