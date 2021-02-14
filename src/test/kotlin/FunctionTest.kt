@@ -131,4 +131,30 @@ class FunctionTest {
         val output = outputStreamCaptor.toString().split('\n')
         assertEquals("4181", output[19].trim())
     }
+
+    @Test
+    fun `functions with closures`() {
+        val source = """
+            fun makeCounter() {
+              var i = 0;
+              fun count() {
+                i = i + 1;
+                print i;
+              }
+
+              return count;
+            }
+
+            var counter = makeCounter();
+            counter(); // "1".
+            counter(); // "2".
+            """
+        val tokens = Scanner(source).scanTokens()
+        val statements = Parser(tokens).parse()
+        interpreter.interpret(statements)
+
+        val output = outputStreamCaptor.toString().split('\n')
+        assertEquals("1", output[0].trim())
+        assertEquals("2", output[1].trim())
+    }
 }
