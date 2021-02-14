@@ -5,6 +5,7 @@ sealed class Stmt {
     interface Visitor<R> {
         fun visit(stmt: Block): R
         fun visit(stmt: Expression): R
+        fun visit(stmt: Function): R
         fun visit(stmt: If): R
         fun visit(stmt: Print): R
         fun visit(stmt: Var): R
@@ -15,6 +16,7 @@ sealed class Stmt {
         return when (this) {
             is Block -> visitor.visit(this)
             is Expression -> visitor.visit(this)
+            is Function -> visitor.visit(this)
             is If -> visitor.visit(this)
             is Print -> visitor.visit(this)
             is Var -> visitor.visit(this)
@@ -27,6 +29,9 @@ sealed class Stmt {
 
     // An expression statement (e.g., 4 + 8;).
     data class Expression(val expr: Expr) : Stmt()
+
+    // An function statement (e.g., fun assign(x, y) { x = y; }).
+    data class Function(val name: Token, val params: List<Token>, val body: List<Stmt>) : Stmt()
 
     // An if-else statement (e.g., if (...) {...} else {...}).
     data class If(val condition: Expr, val thenBranch: Stmt, val elseBranch: Stmt?) : Stmt()
