@@ -1,5 +1,6 @@
 import ca.alexleung.lox.Interpreter
 import ca.alexleung.lox.Parser
+import ca.alexleung.lox.Resolver
 import ca.alexleung.lox.Scanner
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -10,6 +11,7 @@ import java.io.PrintStream
 
 class FunctionTest {
     private val interpreter = Interpreter()
+    private val resolver = Resolver(interpreter)
     private val outputStreamCaptor = ByteArrayOutputStream()
 
     @BeforeEach
@@ -28,6 +30,7 @@ class FunctionTest {
             """
         val tokens = Scanner(source).scanTokens()
         val statements = Parser(tokens).parse()
+        resolver.resolve(statements)
         interpreter.interpret(statements)
 
         val output = outputStreamCaptor.toString().split('\n')
@@ -45,6 +48,7 @@ class FunctionTest {
             """
         val tokens = Scanner(source).scanTokens()
         val statements = Parser(tokens).parse()
+        resolver.resolve(statements)
         interpreter.interpret(statements)
 
         val output = outputStreamCaptor.toString().split('\n')
@@ -61,6 +65,7 @@ class FunctionTest {
             """
         val tokens = Scanner(source).scanTokens()
         val statements = Parser(tokens).parse()
+        resolver.resolve(statements)
         interpreter.interpret(statements)
 
         val output = outputStreamCaptor.toString().split('\n')
@@ -84,6 +89,7 @@ class FunctionTest {
             """
         val tokens = Scanner(source).scanTokens()
         val statements = Parser(tokens).parse()
+        resolver.resolve(statements)
         interpreter.interpret(statements)
 
         val output = outputStreamCaptor.toString().split('\n')
@@ -106,6 +112,7 @@ class FunctionTest {
             """
         val tokens = Scanner(source).scanTokens()
         val statements = Parser(tokens).parse()
+        resolver.resolve(statements)
         interpreter.interpret(statements)
 
         val output = outputStreamCaptor.toString().split('\n')
@@ -126,6 +133,7 @@ class FunctionTest {
             """
         val tokens = Scanner(source).scanTokens()
         val statements = Parser(tokens).parse()
+        resolver.resolve(statements)
         interpreter.interpret(statements)
 
         val output = outputStreamCaptor.toString().split('\n')
@@ -151,6 +159,7 @@ class FunctionTest {
             """
         val tokens = Scanner(source).scanTokens()
         val statements = Parser(tokens).parse()
+        resolver.resolve(statements)
         interpreter.interpret(statements)
 
         val output = outputStreamCaptor.toString().split('\n')

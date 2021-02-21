@@ -17,6 +17,10 @@ class Environment(
         throw RuntimeError(name, "Undefined variable '${name.lexeme}'.")
     }
 
+    fun getAt(distance: Int, name: String): Any? {
+        return ancestor(distance).values[name]
+    }
+
     fun assign(name: Token, value: Any?) {
         if (values.containsKey(name.lexeme)) {
             values[name.lexeme] = value
@@ -35,7 +39,19 @@ class Environment(
         values[name] = value
     }
 
+    fun assignAt(distance: Int, name: Token, value: Any?) {
+        ancestor(distance).values[name.lexeme] = value
+    }
+
     override fun toString(): String {
         return values.toString()
+    }
+
+    private fun ancestor(distance: Int): Environment {
+        var environment = this
+        for (i in 0 until distance) {
+            environment = environment.enclosing!!
+        }
+        return environment
     }
 }

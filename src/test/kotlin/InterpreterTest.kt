@@ -1,6 +1,7 @@
 import ca.alexleung.lox.Expr
 import ca.alexleung.lox.Interpreter
 import ca.alexleung.lox.Parser
+import ca.alexleung.lox.Resolver
 import ca.alexleung.lox.Scanner
 import ca.alexleung.lox.Stmt
 import ca.alexleung.lox.Token
@@ -13,6 +14,8 @@ import java.io.PrintStream
 
 class InterpreterTest {
     private val interpreter = Interpreter()
+    private val resolver = Resolver(interpreter)
+
     private val outputStreamCaptor = ByteArrayOutputStream()
 
     @BeforeEach
@@ -44,6 +47,7 @@ class InterpreterTest {
 
         val statements = listOf(Stmt.Print(expression))
 
+        resolver.resolve(statements)
         interpreter.interpret(statements)
         assertEquals("-208.66", outputStreamCaptor.toString().trim())
     }
@@ -59,6 +63,7 @@ class InterpreterTest {
 
         var statements = listOf(Stmt.Print(expression))
 
+        resolver.resolve(statements)
         interpreter.interpret(statements)
         assertEquals("true", outputStreamCaptor.toString().trim())
 
@@ -73,6 +78,7 @@ class InterpreterTest {
 
         statements = listOf(Stmt.Print(expression))
 
+        resolver.resolve(statements)
         interpreter.interpret(statements)
         assertEquals("false", outputStreamCaptor.toString().trim())
     }
@@ -94,6 +100,7 @@ class InterpreterTest {
             Stmt.Print(Expr.Variable(Token(TokenType.IDENTIFIER, "myVar", null, 2)))
         )
 
+        resolver.resolve(variableStatements)
         interpreter.interpret(variableStatements)
         assertEquals("7", outputStreamCaptor.toString().trim())
 
@@ -107,6 +114,7 @@ class InterpreterTest {
             Stmt.Print(Expr.Variable(Token(TokenType.IDENTIFIER, "myVar", null, 4)))
         )
 
+        resolver.resolve(variableStatements)
         interpreter.interpret(assignStatements)
         assertEquals("13", outputStreamCaptor.toString().trim())
     }
@@ -135,6 +143,7 @@ class InterpreterTest {
             """
         val tokens = Scanner(source).scanTokens()
         val statements = Parser(tokens).parse()
+        resolver.resolve(statements)
         interpreter.interpret(statements)
 
         val output = outputStreamCaptor.toString().split('\n')
@@ -168,6 +177,7 @@ class InterpreterTest {
             """
         val tokens = Scanner(source).scanTokens()
         val statements = Parser(tokens).parse()
+        resolver.resolve(statements)
         interpreter.interpret(statements)
 
         val output = outputStreamCaptor.toString().split('\n')
@@ -184,6 +194,7 @@ class InterpreterTest {
             """
         val tokens = Scanner(source).scanTokens()
         val statements = Parser(tokens).parse()
+        resolver.resolve(statements)
         interpreter.interpret(statements)
 
         val output = outputStreamCaptor.toString().split('\n')
@@ -203,6 +214,7 @@ class InterpreterTest {
             """
         val tokens = Scanner(source).scanTokens()
         val statements = Parser(tokens).parse()
+        resolver.resolve(statements)
         interpreter.interpret(statements)
 
         val output = outputStreamCaptor.toString().split('\n')
@@ -222,6 +234,7 @@ class InterpreterTest {
             """
         val tokens = Scanner(source).scanTokens()
         val statements = Parser(tokens).parse()
+        resolver.resolve(statements)
         interpreter.interpret(statements)
 
         val output = outputStreamCaptor.toString().split('\n')

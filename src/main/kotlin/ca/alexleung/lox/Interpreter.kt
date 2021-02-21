@@ -1,8 +1,9 @@
 package ca.alexleung.lox
 
 class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
-    val globals = Environment()
+    private val globals = Environment()
     private var environment = globals
+    private val locals = mutableMapOf<Expr, Int>()
 
     constructor() {
         globals.define("clock", object : LoxCallable {
@@ -25,9 +26,19 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
         }
     }
 
+    fun resolve(expr: Expr, depth: Int) {
+        locals[expr] = depth
+    }
+
     override fun visit(expr: Expr.Assign): Any? {
         val value = evaluate(expr.value)
-        environment.assign(expr.name, value)
+        if (locals.containsKey(expr)) {
+            // Note that this block has a high degree of coupling to the Resolver class.
+            val distance = locals[expr]!!
+            environment.assignAt(distance, expr.name, value)
+        } else {
+            globals.assign(expr.name, value)
+        }
         return value
     }
 
@@ -142,7 +153,17 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
     }
 
     override fun visit(expr: Expr.Variable): Any? {
-        return environment.get(expr.name)
+        return lookUpVariable(expr.name, expr)
+    }
+
+    private fun lookUpVariable(name: Token, expr: Expr): Any? {
+        return if (locals.containsKey(expr)) {
+            // Note that this block has a high degree of coupling to the Resolver class.
+            val distance = locals[expr]!!
+            environment.getAt(distance, name.lexeme)
+        } else {
+            globals.get(name)
+        }
     }
 
     override fun visit(stmt: Stmt.Block) {

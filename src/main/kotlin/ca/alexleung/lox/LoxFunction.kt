@@ -2,8 +2,6 @@ package ca.alexleung.lox
 
 class LoxFunction(
     private val declaration: Stmt.Function,
-
-    // TODO: Fix this scoping leak.
     private val closure: Environment
 ) : LoxCallable {
     override fun arity(): Int = declaration.params.size
