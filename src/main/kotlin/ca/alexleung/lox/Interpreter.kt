@@ -1,9 +1,14 @@
 package ca.alexleung.lox
 
+import java.util.IdentityHashMap
+
 class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
     private val globals = Environment()
     private var environment = globals
-    private val locals = mutableMapOf<Expr, Int>()
+
+    // Use an IdentityHashMap to distinguish between identical expressions on the same line that have
+    // semantically different scopes.
+    private val locals = IdentityHashMap<Expr, Int>()
 
     constructor() {
         globals.define("clock", object : LoxCallable {
