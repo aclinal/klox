@@ -20,14 +20,23 @@ class OutputTester {
         return capturedOutput.removeAt(0)
     }
 
-    fun size() = capturedOutput.size
+    fun size(): Int {
+        consumeLatestOutput()
+        return capturedOutput.size
+    }
 
-    fun clear() = capturedOutput.clear()
+    fun clear() {
+        consumeLatestOutput()
+        capturedOutput.clear()
+    }
 
     private fun consumeLatestOutput() {
         val actualOutput = outputStreamCaptor.toString().split('\n')
         for (actual in actualOutput) {
-            capturedOutput.add(actual.trim())
+            val trimmedActual = actual.trim()
+            if (trimmedActual.isNotEmpty()) {
+                capturedOutput.add(actual.trim())
+            }
         }
         outputStreamCaptor.reset()
     }

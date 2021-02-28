@@ -204,7 +204,8 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
 
         val methods = mutableMapOf<String, LoxFunction>()
         for (method in stmt.methods) {
-            methods[method.name.lexeme] = LoxFunction(method, environment)
+            methods[method.name.lexeme] =
+                LoxFunction(method, environment, method.name.lexeme == LoxClass.INITIALIZER_NAME)
         }
 
         val loxClass = LoxClass(stmt.name.lexeme, methods)

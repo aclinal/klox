@@ -13,6 +13,7 @@ class Resolver(
     private enum class FunctionType {
         NONE,
         FUNCTION,
+        INITIALIZER,
         METHOD
     }
 
@@ -112,7 +113,10 @@ class Resolver(
             beginScope()
             scopes.last()["this"] = true
             for (method in stmt.methods) {
-                val declaration = FunctionType.METHOD
+                var declaration = FunctionType.METHOD
+                if (method.name.lexeme == LoxClass.INITIALIZER_NAME) {
+                    declaration = FunctionType.INITIALIZER
+                }
                 resolveFunction(method, declaration)
             }
             endScope()
@@ -149,6 +153,9 @@ class Resolver(
         }
 
         if (stmt.value != null) {
+            if (currentFunction == FunctionType.INITIALIZER) {
+                Lox.error(stmt.keyword, "Can't return a value from an initializer")
+            }
             resolve(stmt.value)
         }
     }
