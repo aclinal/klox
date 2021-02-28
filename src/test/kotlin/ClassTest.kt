@@ -1,14 +1,9 @@
 import ca.alexleung.lox.Interpreter
-import ca.alexleung.lox.Lox
 import ca.alexleung.lox.Parser
 import ca.alexleung.lox.Resolver
 import ca.alexleung.lox.Scanner
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.io.ByteArrayOutputStream
-import java.io.PrintStream
 
 class ClassTest {
     private val interpreter = Interpreter()
@@ -86,5 +81,71 @@ class ClassTest {
         interpreter.interpret(statements)
 
         outputTester.takeAndAssertOutput("Crunch crunch crunch!")
+    }
+
+    @Test
+    fun `methods capture this`() {
+        val source = """
+            |class Egotist {
+            | speak() {
+            |   print this;
+            | }
+            |}
+            |
+            |var method = Egotist().speak;
+            |method();
+            |""".trimMargin()
+        val tokens = Scanner(source).scanTokens()
+        val statements = Parser(tokens).parse()
+        resolver.resolve(statements)
+        interpreter.interpret(statements)
+
+        outputTester.takeAndAssertOutput("Egotist instance")
+    }
+
+    @Test
+    fun `methods can access fields`() {
+        val source = """
+            |class Cake {
+            |  taste() {
+            |    var adjective = "delicious";
+            |    print "The " + this.flavor + " cake is " + adjective + "!";
+            |  }
+            |}
+            |
+            |var cake = Cake();
+            |cake.flavor = "German chocolate";
+            |cake.taste(); // Prints "The German chocolate cake is delicious!".
+            |""".trimMargin()
+        val tokens = Scanner(source).scanTokens()
+        val statements = Parser(tokens).parse()
+        resolver.resolve(statements)
+        interpreter.interpret(statements)
+
+        outputTester.takeAndAssertOutput("The German chocolate cake is delicious!")
+    }
+
+    @Test
+    fun `methods can return callbacks that capture this`() {
+        val source = """
+            |class Thing {
+            |  getCallback() {
+            |    fun localFunction() {
+            |      print this;
+            |    }
+            |    
+            |    return localFunction;
+            |  }
+            |}
+            |
+            |var callback = Thing().getCallback();
+            |callback();
+            |""".trimMargin()
+        val tokens = Scanner(source).scanTokens()
+        val statements = Parser(tokens).parse()
+        resolver.resolve(statements)
+        interpreter.interpret(statements)
+
+        outputTester.takeAndAssertOutput("Thing instance")
     }
 }

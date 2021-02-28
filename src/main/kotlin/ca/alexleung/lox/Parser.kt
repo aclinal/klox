@@ -58,32 +58,14 @@ class Parser(private val tokens: List<Token>) {
         return Stmt.Var(name, initializer)
     }
 
-    private fun statement(): Stmt {
-        if (match(TokenType.FOR)) {
-            return forStatement()
-        }
-
-        if (match(TokenType.IF)) {
-            return ifStatement()
-        }
-
-        if (match(TokenType.PRINT)) {
-            return printStatement()
-        }
-
-        if (match(TokenType.RETURN)) {
-            return returnStatement()
-        }
-
-        if (match(TokenType.WHILE)) {
-            return whileStatement()
-        }
-
-        if (match(TokenType.LEFT_BRACE)) {
-            return Stmt.Block(block())
-        }
-
-        return expressionStatement()
+    private fun statement(): Stmt = when {
+        match(TokenType.FOR) -> forStatement()
+        match(TokenType.IF) -> ifStatement()
+        match(TokenType.PRINT) -> printStatement()
+        match(TokenType.RETURN) -> returnStatement()
+        match(TokenType.WHILE) -> whileStatement()
+        match(TokenType.LEFT_BRACE) -> Stmt.Block(block())
+        else -> expressionStatement()
     }
 
     private fun forStatement(): Stmt {
@@ -325,35 +307,22 @@ class Parser(private val tokens: List<Token>) {
         return Expr.Call(callee, paren, arguments)
     }
 
-    private fun primary(): Expr {
-        if (match(TokenType.TRUE)) {
-            return Expr.Literal(true)
-        }
-
-        if (match(TokenType.FALSE)) {
-            return Expr.Literal(false)
-        }
-
-        if (match(TokenType.NIL)) {
-            return Expr.Literal(null)
-        }
-
-        if (match(TokenType.NUMBER, TokenType.STRING)) {
+    private fun primary(): Expr = when {
+        match(TokenType.TRUE) -> Expr.Literal(true)
+        match(TokenType.FALSE) -> Expr.Literal(false)
+        match(TokenType.NIL) -> Expr.Literal(null)
+        match(TokenType.NUMBER, TokenType.STRING) -> {
             val literal = previous().literal
-            return Expr.Literal(literal)
+            Expr.Literal(literal)
         }
-
-        if (match(TokenType.IDENTIFIER)) {
-            return Expr.Variable(previous())
-        }
-
-        if (match(TokenType.LEFT_PAREN)) {
+        match(TokenType.THIS) -> Expr.This(previous())
+        match(TokenType.IDENTIFIER) -> Expr.Variable(previous())
+        match(TokenType.LEFT_PAREN) -> {
             val expr = expression()
             consume(TokenType.RIGHT_PAREN, "Expect ')' after expression")
-            return Expr.Grouping(expr)
+            Expr.Grouping(expr)
         }
-
-        throw error(peek(), "Expecting an expression.")
+        else -> throw error(peek(), "Expecting an expression.")
     }
 
     private fun match(vararg types: TokenType): Boolean {

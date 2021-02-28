@@ -67,12 +67,16 @@ class Resolver(
         resolve(expr.obj)
     }
 
+    override fun visit(expr: Expr.This) {
+        resolveLocal(expr, expr.keyword)
+    }
+
     override fun visit(expr: Expr.Unary) {
         resolve(expr.right)
     }
 
     override fun visit(expr: Expr.Variable) {
-        if (scopes.isNotEmpty() && !scopes[scopes.size - 1].getOrDefault(expr.name.lexeme, true)) {
+        if (scopes.isNotEmpty() && !scopes.last().getOrDefault(expr.name.lexeme, true)) {
             Lox.error(expr.name, "Can't read local variable in its own initializer.")
         }
 
@@ -89,10 +93,13 @@ class Resolver(
         declare(stmt.name)
         define(stmt.name)
 
+        beginScope()
+        scopes.last()["this"] = true
         for (method in stmt.methods) {
             val declaration = FunctionType.METHOD
             resolveFunction(method, declaration)
         }
+        endScope()
     }
 
     override fun visit(stmt: Stmt.Expression) {
@@ -157,7 +164,7 @@ class Resolver(
             return
         }
 
-        val scope = scopes[scopes.size - 1]
+        val scope = scopes.last()
 
         // Disallow re-declaring local variables at the same scope.
         if (scope.containsKey(name.lexeme)) {
@@ -172,7 +179,7 @@ class Resolver(
             return
         }
 
-        scopes[scopes.size - 1][name.lexeme] = true
+        scopes.last()[name.lexeme] = true
     }
 
     private fun resolveLocal(expr: Expr, name: Token) {
