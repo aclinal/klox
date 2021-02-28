@@ -8,10 +8,17 @@ class Resolver(
 
     private var currentFunction = FunctionType.NONE
 
+    private var currentClass = ClassType.NONE
+
     private enum class FunctionType {
         NONE,
         FUNCTION,
         METHOD
+    }
+
+    private enum class ClassType {
+        NONE,
+        CLASS
     }
 
     fun resolve(statements: List<Stmt>) {
@@ -68,6 +75,11 @@ class Resolver(
     }
 
     override fun visit(expr: Expr.This) {
+        if (currentClass == ClassType.NONE) {
+            Lox.error(expr.keyword, "Can't use 'this' outside of a class.")
+            return
+        }
+
         resolveLocal(expr, expr.keyword)
     }
 
@@ -90,16 +102,23 @@ class Resolver(
     }
 
     override fun visit(stmt: Stmt.Class) {
-        declare(stmt.name)
-        define(stmt.name)
+        val enclosingClass = currentClass
+        try {
+            currentClass = ClassType.CLASS
 
-        beginScope()
-        scopes.last()["this"] = true
-        for (method in stmt.methods) {
-            val declaration = FunctionType.METHOD
-            resolveFunction(method, declaration)
+            declare(stmt.name)
+            define(stmt.name)
+
+            beginScope()
+            scopes.last()["this"] = true
+            for (method in stmt.methods) {
+                val declaration = FunctionType.METHOD
+                resolveFunction(method, declaration)
+            }
+            endScope()
+        } finally {
+            currentClass = enclosingClass
         }
-        endScope()
     }
 
     override fun visit(stmt: Stmt.Expression) {

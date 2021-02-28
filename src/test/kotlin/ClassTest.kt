@@ -1,7 +1,9 @@
 import ca.alexleung.lox.Interpreter
+import ca.alexleung.lox.Lox
 import ca.alexleung.lox.Parser
 import ca.alexleung.lox.Resolver
 import ca.alexleung.lox.Scanner
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -147,5 +149,20 @@ class ClassTest {
         interpreter.interpret(statements)
 
         outputTester.takeAndAssertOutput("Thing instance")
+    }
+
+    @Test
+    fun `invalid uses of this`() {
+        val source = """
+            |fun notAMethod() {
+            |  print this;
+            |}
+            |""".trimMargin()
+        val tokens = Scanner(source).scanTokens()
+        val statements = Parser(tokens).parse()
+        resolver.resolve(statements)
+        interpreter.interpret(statements)
+
+        assertTrue(Lox.hadError)
     }
 }

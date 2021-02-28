@@ -56,7 +56,7 @@ sealed class Expr {
     // A property set expression (e.g., foo.bar = "foobar").
     data class Set(val obj: Expr, val name: Token, val value: Expr) : Expr()
 
-    // The "this" expression, used inside methods.
+    // The "this" expression, used inside classes.
     data class This(val keyword: Token) : Expr()
 
     // A unary operator that prefixes an expression (e.g., !).
