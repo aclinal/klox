@@ -52,4 +52,20 @@ class ClassTest {
 
         outputTester.takeAndAssertOutput("Bagel instance")
     }
+
+    @Test
+    fun `get and set instance fields`() {
+        val source = """
+            |class Bagel {}
+            |var bagel = Bagel();
+            |bagel.foo = "bar";
+            |print bagel.foo; // Prints "bar".
+            |""".trimMargin()
+        val tokens = Scanner(source).scanTokens()
+        val statements = Parser(tokens).parse()
+        resolver.resolve(statements)
+        interpreter.interpret(statements)
+
+        outputTester.takeAndAssertOutput("bar")
+    }
 }

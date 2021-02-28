@@ -6,9 +6,11 @@ sealed class Expr {
         fun visit(expr: Assign): R
         fun visit(expr: Binary): R
         fun visit(expr: Call): R
+        fun visit(expr: Get): R
         fun visit(expr: Grouping): R
         fun visit(expr: Literal): R
         fun visit(expr: Logical): R
+        fun visit(expr: Set): R
         fun visit(expr: Unary): R
         fun visit(expr: Variable): R
     }
@@ -18,9 +20,11 @@ sealed class Expr {
             is Assign -> visitor.visit(this)
             is Binary -> visitor.visit(this)
             is Call -> visitor.visit(this)
+            is Get -> visitor.visit(this)
             is Grouping -> visitor.visit(this)
             is Literal -> visitor.visit(this)
             is Logical -> visitor.visit(this)
+            is Set -> visitor.visit(this)
             is Unary -> visitor.visit(this)
             is Variable -> visitor.visit(this)
         }
@@ -35,6 +39,9 @@ sealed class Expr {
     // A function call expression (e.g., f(3)).
     data class Call(val callee: Expr, val paren: Token, val arguments: List<Expr>) : Expr()
 
+    // A property access expression (e.g., foo.bar).
+    data class Get(val obj: Expr, val name: Token) : Expr()
+
     // An expression encapsulated in parentheses.
     data class Grouping(val expression: Expr) : Expr()
 
@@ -43,6 +50,9 @@ sealed class Expr {
 
     // A logical expression (e.g., (a and b)).
     data class Logical(val left: Expr, val operator: Token, val right: Expr) : Expr()
+
+    // A property set expression (e.g., foo.bar = "foobar").
+    data class Set(val obj: Expr, val name: Token, val value: Expr) : Expr()
 
     // A unary operator that prefixes an expression (e.g., !).
     data class Unary(val operator: Token, val right: Expr) : Expr()

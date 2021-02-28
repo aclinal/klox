@@ -44,6 +44,10 @@ class Resolver(
         }
     }
 
+    override fun visit(expr: Expr.Get) {
+        resolve(expr.obj)
+    }
+
     override fun visit(expr: Expr.Grouping) {
         resolve(expr.expression)
     }
@@ -55,6 +59,11 @@ class Resolver(
     override fun visit(expr: Expr.Logical) {
         resolve(expr.left)
         resolve(expr.right)
+    }
+
+    override fun visit(expr: Expr.Set) {
+        resolve(expr.value)
+        resolve(expr.obj)
     }
 
     override fun visit(expr: Expr.Unary) {
