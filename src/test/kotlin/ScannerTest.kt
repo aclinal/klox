@@ -8,9 +8,9 @@ class ScannerTest {
     @Test
     fun `valid tokens are parsed correctly`() {
         val source = """// this is a comment
-            (( )){} // grouping stuff
-            !*+-/=<> <= == // operators
-            """
+            |(( )){} // grouping stuff
+            |!*+-/=<> <= == // operators
+            |""".trimMargin()
         val scanner = Scanner(source)
         val tokens = scanner.scanTokens()
         assertEquals(17, tokens.size)

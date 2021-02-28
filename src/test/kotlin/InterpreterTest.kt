@@ -6,21 +6,17 @@ import ca.alexleung.lox.Scanner
 import ca.alexleung.lox.Stmt
 import ca.alexleung.lox.Token
 import ca.alexleung.lox.TokenType
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.io.ByteArrayOutputStream
-import java.io.PrintStream
 
 class InterpreterTest {
     private val interpreter = Interpreter()
     private val resolver = Resolver(interpreter)
-
-    private val outputStreamCaptor = ByteArrayOutputStream()
+    private val outputTester = OutputTester()
 
     @BeforeEach
     fun setup() {
-        System.setOut(PrintStream(outputStreamCaptor))
+        outputTester.setup()
     }
 
     @Test
@@ -49,7 +45,7 @@ class InterpreterTest {
 
         resolver.resolve(statements)
         interpreter.interpret(statements)
-        assertEquals("-208.66", outputStreamCaptor.toString().trim())
+        outputTester.takeAndAssertOutput("-208.66")
     }
 
     @Test
@@ -65,9 +61,9 @@ class InterpreterTest {
 
         resolver.resolve(statements)
         interpreter.interpret(statements)
-        assertEquals("true", outputStreamCaptor.toString().trim())
+        outputTester.takeAndAssertOutput("true")
 
-        outputStreamCaptor.reset()
+        outputTester.clear()
 
         // 5.0 < 4.0
         expression = Expr.Binary(
@@ -80,7 +76,7 @@ class InterpreterTest {
 
         resolver.resolve(statements)
         interpreter.interpret(statements)
-        assertEquals("false", outputStreamCaptor.toString().trim())
+        outputTester.takeAndAssertOutput("false")
     }
 
     @Test
@@ -102,9 +98,9 @@ class InterpreterTest {
 
         resolver.resolve(variableStatements)
         interpreter.interpret(variableStatements)
-        assertEquals("7", outputStreamCaptor.toString().trim())
+        outputTester.takeAndAssertOutput("7")
 
-        outputStreamCaptor.reset()
+        outputTester.clear()
 
         val assignStatements = listOf(
             // myVar = 13;
@@ -116,132 +112,131 @@ class InterpreterTest {
 
         resolver.resolve(variableStatements)
         interpreter.interpret(assignStatements)
-        assertEquals("13", outputStreamCaptor.toString().trim())
+        outputTester.takeAndAssertOutput("13")
     }
 
     @Test
     fun `interprets block statements`() {
-        val source = """var a = "global a";
-            var b = "global b";
-            var c = "global c";
-            {
-              var a = "outer a";
-              var b = "outer b";
-              {
-                var a = "inner a";
-                print a;
-                print b;
-                print c;
-              }
-              print a;
-              print b;
-              print c;
-            }
-            print a;
-            print b;
-            print c;
-            """
+        val source = """|
+            |var a = "global a";
+            |var b = "global b";
+            |var c = "global c";
+            |{
+            |  var a = "outer a";
+            |  var b = "outer b";
+            |  {
+            |    var a = "inner a";
+            |    print a;
+            |    print b;
+            |    print c;
+            |  }
+            |  print a;
+            |  print b;
+            |  print c;
+            |}
+            |print a;
+            |print b;
+            |print c;
+            |""".trimMargin()
         val tokens = Scanner(source).scanTokens()
         val statements = Parser(tokens).parse()
         resolver.resolve(statements)
         interpreter.interpret(statements)
 
-        val output = outputStreamCaptor.toString().split('\n')
-        assertEquals("inner a", output[0].trim())
-        assertEquals("outer b", output[1].trim())
-        assertEquals("global c", output[2].trim())
+        outputTester.takeAndAssertOutput("inner a")
+        outputTester.takeAndAssertOutput("outer b")
+        outputTester.takeAndAssertOutput("global c")
 
-        assertEquals("outer a", output[3].trim())
-        assertEquals("outer b", output[4].trim())
-        assertEquals("global c", output[5].trim())
+        outputTester.takeAndAssertOutput("outer a")
+        outputTester.takeAndAssertOutput("outer b")
+        outputTester.takeAndAssertOutput("global c")
 
-        assertEquals("global a", output[6].trim())
-        assertEquals("global b", output[7].trim())
-        assertEquals("global c", output[8].trim())
+        outputTester.takeAndAssertOutput("global a")
+        outputTester.takeAndAssertOutput("global b")
+        outputTester.takeAndAssertOutput("global c")
     }
 
     @Test
     fun `interprets if statements`() {
-        val source = """var a = 5;
-            if (a > 3) {
-              print "a: gt 3";
-            } else {
-              print "a: not gt 3";
-            }
-            
-            if (a < 3) {
-              print "a: lt 3";
-            } else {
-              print "a: not lt 3";
-            }
-            """
+        val source = """
+            |var a = 5;
+            |if (a > 3) {
+            |  print "a: gt 3";
+            |} else {
+            |  print "a: not gt 3";
+            |}
+            |
+            |if (a < 3) {
+            |  print "a: lt 3";
+            |} else {
+            |  print "a: not lt 3";
+            |}
+            |""".trimMargin()
         val tokens = Scanner(source).scanTokens()
         val statements = Parser(tokens).parse()
         resolver.resolve(statements)
         interpreter.interpret(statements)
 
-        val output = outputStreamCaptor.toString().split('\n')
-        assertEquals("a: gt 3", output[0].trim())
-        assertEquals("a: not lt 3", output[1].trim())
+        outputTester.takeAndAssertOutput("a: gt 3")
+        outputTester.takeAndAssertOutput("a: not lt 3")
     }
 
     @Test
     fun `interprets logical operators`() {
-        val source = """print "hi" or 2;
-            print "hi" and 2;
-            print nil or "yes";
-            print nil and "yes";
-            """
+        val source = """
+            |print "hi" or 2;
+            |print "hi" and 2;
+            |print nil or "yes";
+            |print nil and "yes";
+            |""".trimMargin()
         val tokens = Scanner(source).scanTokens()
         val statements = Parser(tokens).parse()
         resolver.resolve(statements)
         interpreter.interpret(statements)
 
-        val output = outputStreamCaptor.toString().split('\n')
-        assertEquals("hi", output[0].trim())
-        assertEquals("2", output[1].trim())
-        assertEquals("yes", output[2].trim())
-        assertEquals("nil", output[3].trim())
+        outputTester.takeAndAssertOutput("hi")
+        outputTester.takeAndAssertOutput("2")
+        outputTester.takeAndAssertOutput("yes")
+        outputTester.takeAndAssertOutput("nil")
     }
 
     @Test
     fun `interprets while loops`() {
-        val source = """var i = 0;
-            while (i < 5) {
-              print i;
-              i = i + 1;
-            }
-            """
+        val source = """
+            |var i = 0;
+            |while (i < 5) {
+            |  print i;
+            |  i = i + 1;
+            |}
+            |""".trimMargin()
         val tokens = Scanner(source).scanTokens()
         val statements = Parser(tokens).parse()
         resolver.resolve(statements)
         interpreter.interpret(statements)
 
-        val output = outputStreamCaptor.toString().split('\n')
-        assertEquals("0", output[0].trim())
-        assertEquals("1", output[1].trim())
-        assertEquals("2", output[2].trim())
-        assertEquals("3", output[3].trim())
-        assertEquals("4", output[4].trim())
+        outputTester.takeAndAssertOutput("0")
+        outputTester.takeAndAssertOutput("1")
+        outputTester.takeAndAssertOutput("2")
+        outputTester.takeAndAssertOutput("3")
+        outputTester.takeAndAssertOutput("4")
     }
 
     @Test
     fun `interprets for loops`() {
         val source = """
-            for (var i = 0; i < 5; i = i + 1) {
-              print i;
-            }
-            """
+            |for (var i = 0; i < 5; i = i + 1) {
+            |  print i;
+            |}
+            |""".trimMargin()
         val tokens = Scanner(source).scanTokens()
         val statements = Parser(tokens).parse()
         resolver.resolve(statements)
         interpreter.interpret(statements)
 
-        val output = outputStreamCaptor.toString().split('\n')
-        assertEquals("0", output[0].trim())
-        assertEquals("1", output[1].trim())
-        assertEquals("2", output[2].trim())
-        assertEquals("3", output[3].trim())
-        assertEquals("4", output[4].trim())
+        outputTester.takeAndAssertOutput("0")
+        outputTester.takeAndAssertOutput("1")
+        outputTester.takeAndAssertOutput("2")
+        outputTester.takeAndAssertOutput("3")
+        outputTester.takeAndAssertOutput("4")
     }
 }

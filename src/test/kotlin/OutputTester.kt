@@ -11,12 +11,24 @@ class OutputTester {
     }
 
     fun takeAndAssertOutput(expected: String) {
-        // Consume the latest stream output.
+        consumeLatestOutput()
+        assertEquals(expected, capturedOutput.removeAt(0))
+    }
+
+    fun take(): String {
+        consumeLatestOutput()
+        return capturedOutput.removeAt(0)
+    }
+
+    fun size() = capturedOutput.size
+
+    fun clear() = capturedOutput.clear()
+
+    private fun consumeLatestOutput() {
         val actualOutput = outputStreamCaptor.toString().split('\n')
         for (actual in actualOutput) {
             capturedOutput.add(actual.trim())
         }
-
-        assertEquals(expected, capturedOutput.removeAt(0))
+        outputStreamCaptor.reset()
     }
 }
