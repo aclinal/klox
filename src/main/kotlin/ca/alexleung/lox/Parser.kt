@@ -1,7 +1,7 @@
 package ca.alexleung.lox
 
 class Parser(private val tokens: List<Token>) {
-    private var current: Int = 0;
+    private var current: Int = 0
 
     class ParseError : RuntimeException()
 

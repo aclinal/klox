@@ -9,7 +9,7 @@ class Lox() {
     private val interpreter = Interpreter()
 
     companion object {
-        var hadError = false;
+        var hadError = false
         var hadRuntimeError = false
 
         fun error(line: Int, message: String) {
@@ -53,14 +53,14 @@ class Lox() {
             println("> ")
             val line = readLine() ?: break
             run(line)
-            hadError = false;
+            hadError = false
         }
     }
 
     private fun run(source: String) {
         val scanner = Scanner(source)
 
-        val tokens = scanner.scanTokens();
+        val tokens = scanner.scanTokens()
 
         val parser = Parser(tokens)
         val statements = parser.parse()

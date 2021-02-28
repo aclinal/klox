@@ -2,9 +2,9 @@ package ca.alexleung.lox
 
 class Scanner(private val source: String) {
     private val tokens = mutableListOf<Token>()
-    private var start = 0;
-    private var current = 0;
-    private var line = 1;
+    private var start = 0
+    private var current = 0
+    private var line = 1
 
     private val keywords = mapOf(
         "and" to TokenType.AND,
@@ -27,8 +27,8 @@ class Scanner(private val source: String) {
 
     fun scanTokens(): List<Token> {
         while (!isAtEnd()) {
-            start = current;
-            scanToken();
+            start = current
+            scanToken()
 
         }
 

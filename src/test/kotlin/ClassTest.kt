@@ -68,4 +68,23 @@ class ClassTest {
 
         outputTester.takeAndAssertOutput("bar")
     }
+
+    @Test
+    fun `stateless method calls`() {
+        val source = """
+            |class Bacon {
+            | eat() {
+            |   print "Crunch crunch crunch!";
+            | }
+            |}
+            |
+            |Bacon().eat();
+            |""".trimMargin()
+        val tokens = Scanner(source).scanTokens()
+        val statements = Parser(tokens).parse()
+        resolver.resolve(statements)
+        interpreter.interpret(statements)
+
+        outputTester.takeAndAssertOutput("Crunch crunch crunch!")
+    }
 }

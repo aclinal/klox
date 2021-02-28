@@ -197,7 +197,13 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
 
     override fun visit(stmt: Stmt.Class) {
         environment.define(stmt.name.lexeme, null)
-        val loxClass = LoxClass(stmt.name.lexeme)
+
+        val methods = mutableMapOf<String, LoxFunction>()
+        for (method in stmt.methods) {
+            methods[method.name.lexeme] = LoxFunction(method, environment)
+        }
+
+        val loxClass = LoxClass(stmt.name.lexeme, methods)
         environment.assign(stmt.name, loxClass)
     }
 
@@ -268,7 +274,7 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
 
     private fun checkNumberOperand(operator: Token, operand: Any?) {
         if (operand is Double) {
-            return;
+            return
         }
 
         throw RuntimeError(operator, "Operand must be a number.")
@@ -276,7 +282,7 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
 
     private fun checkNumberOperands(operator: Token, left: Any?, right: Any?) {
         if (left is Double && right is Double) {
-            return;
+            return
         }
 
         throw RuntimeError(operator, "Operands must be numbers.")

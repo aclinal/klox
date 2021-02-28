@@ -7,6 +7,12 @@ class LoxInstance(private val loxClass: LoxClass) {
         if (name.lexeme in fields) {
             return fields[name.lexeme]
         }
+
+        val method = loxClass.findMethod(name.lexeme)
+        if (method != null) {
+            return method
+        }
+
         throw RuntimeError(name, "Undefined property '${name.lexeme}'.")
     }
 

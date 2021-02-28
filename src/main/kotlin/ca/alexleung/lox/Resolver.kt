@@ -10,7 +10,8 @@ class Resolver(
 
     private enum class FunctionType {
         NONE,
-        FUNCTION
+        FUNCTION,
+        METHOD
     }
 
     fun resolve(statements: List<Stmt>) {
@@ -87,6 +88,11 @@ class Resolver(
     override fun visit(stmt: Stmt.Class) {
         declare(stmt.name)
         define(stmt.name)
+
+        for (method in stmt.methods) {
+            val declaration = FunctionType.METHOD
+            resolveFunction(method, declaration)
+        }
     }
 
     override fun visit(stmt: Stmt.Expression) {
