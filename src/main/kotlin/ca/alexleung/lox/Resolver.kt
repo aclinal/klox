@@ -75,6 +75,11 @@ class Resolver(
         endScope()
     }
 
+    override fun visit(stmt: Stmt.Class) {
+        declare(stmt.name)
+        define(stmt.name)
+    }
+
     override fun visit(stmt: Stmt.Expression) {
         resolve(stmt.expr)
     }

@@ -175,6 +175,12 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
         executeBlock(stmt.statements, Environment(environment))
     }
 
+    override fun visit(stmt: Stmt.Class) {
+        environment.define(stmt.name.lexeme, null)
+        val loxClass = LoxClass(stmt.name.lexeme)
+        environment.assign(stmt.name, loxClass)
+    }
+
     override fun visit(stmt: Stmt.Expression) {
         evaluate(stmt.expr)
     }
