@@ -164,6 +164,21 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
         return value
     }
 
+    override fun visit(expr: Expr.Super): Any? {
+        val distance = locals[expr] ?: return null
+
+        val superclass = environment.getAt(distance, "super") as LoxClass
+
+        // "this" is always stored in the environment in which we store "super".
+        val obj = environment.getAt(distance - 1, "this") as LoxInstance
+
+        val method = superclass.findMethod(expr.method.lexeme) ?: throw RuntimeError(
+            expr.method, "Undefined property '${expr.method.lexeme}'."
+        )
+
+        return method.bind(obj)
+    }
+
     override fun visit(expr: Expr.This): Any? {
         return lookUpVariable(expr.keyword, expr)
     }
@@ -200,15 +215,33 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
     }
 
     override fun visit(stmt: Stmt.Class) {
+        val superclass = stmt.superclass?.let {
+            val value = evaluate(it)
+            if (value !is LoxClass) {
+                throw RuntimeError(it.name, "Superclass must be a class.")
+            }
+            value
+        }
+
         environment.define(stmt.name.lexeme, null)
+
+        if (stmt.superclass != null) {
+            environment = Environment(environment)
+            environment.define("super", superclass)
+        }
 
         val methods = mutableMapOf<String, LoxFunction>()
         for (method in stmt.methods) {
-            methods[method.name.lexeme] =
-                LoxFunction(method, environment, method.name.lexeme == LoxClass.INITIALIZER_NAME)
+            methods[method.name.lexeme] = LoxFunction(
+                method, environment, method.name.lexeme == LoxClass.INITIALIZER_NAME
+            )
         }
 
-        val loxClass = LoxClass(stmt.name.lexeme, methods)
+        if (stmt.superclass != null) {
+            environment = environment.enclosing!!
+        }
+
+        val loxClass = LoxClass(stmt.name.lexeme, superclass, methods)
         environment.assign(stmt.name, loxClass)
     }
 
@@ -235,7 +268,7 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
     }
 
     override fun visit(stmt: Stmt.Return) {
-        val value = if (stmt.value != null) evaluate(stmt.value) else null
+        val value = stmt.value?.let { evaluate(it) }
         throw Return(value)
     }
 

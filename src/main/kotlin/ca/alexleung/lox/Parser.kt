@@ -34,6 +34,12 @@ class Parser(private val tokens: List<Token>) {
 
     private fun classDeclaration(): Stmt {
         val name = consume(TokenType.IDENTIFIER, "Expect class name.")
+
+        val superclass = if (match(TokenType.LESS)) {
+            consume(TokenType.IDENTIFIER, "Expect superclass name.")
+            Expr.Variable(previous())
+        } else null
+
         consume(TokenType.LEFT_BRACE, "Expect '{' before class body.")
 
         val methods = mutableListOf<Stmt.Function>()
@@ -42,7 +48,7 @@ class Parser(private val tokens: List<Token>) {
         }
 
         consume(TokenType.RIGHT_BRACE, "Expect '}' after class body.")
-        return Stmt.Class(name, methods)
+        return Stmt.Class(name, superclass, methods)
     }
 
     private fun varDeclaration(): Stmt {
@@ -86,19 +92,15 @@ class Parser(private val tokens: List<Token>) {
 
         consume(TokenType.RIGHT_PAREN, "Expect ')' after for clauses.")
 
-        val body = if (increment != null) {
-            Stmt.Block(listOf(statement(), Stmt.Expression(increment)))
-        } else {
-            statement()
-        }
+        val body = increment?.let {
+            Stmt.Block(listOf(statement(), Stmt.Expression(it)))
+        } ?: statement()
 
         val loop = Stmt.While(condition ?: Expr.Literal(true), body)
 
-        return if (initializer != null) {
-            Stmt.Block(listOf(initializer, loop))
-        } else {
-            loop
-        }
+        return initializer?.let {
+            Stmt.Block(listOf(it, loop))
+        } ?: loop
     }
 
     private fun ifStatement(): Stmt {
@@ -314,6 +316,12 @@ class Parser(private val tokens: List<Token>) {
         match(TokenType.NUMBER, TokenType.STRING) -> {
             val literal = previous().literal
             Expr.Literal(literal)
+        }
+        match(TokenType.SUPER) -> {
+            val keyword = previous()
+            consume(TokenType.DOT, "Expect '.' after 'super'.")
+            val method = consume(TokenType.IDENTIFIER, "Expect superclass method name.")
+            Expr.Super(keyword, method)
         }
         match(TokenType.THIS) -> Expr.This(previous())
         match(TokenType.IDENTIFIER) -> Expr.Variable(previous())

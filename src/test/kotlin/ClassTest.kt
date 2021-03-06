@@ -203,7 +203,7 @@ class ClassTest {
         interpreter.interpret(statements)
 
         assertTrue(Lox.hadError)
-        outputTester.takeAndAssertOutput("[line 3] Error at 'return': Can't return a value from an initializer")
+        outputTester.takeAndAssertOutput("[line 3] Error at 'return': Can't return a value from an initializer.")
     }
 
     @Test
@@ -225,5 +225,113 @@ class ClassTest {
 
         assertEquals(1, outputTester.size())
         outputTester.takeAndAssertOutput("Foo instance")
+    }
+
+    @Test
+    fun `basic inheritance`() {
+        val source = """
+            |class Doughnut {
+            |  cook() {
+            |    print "Fry until golden brown.";
+            |  }
+            |}
+            |class BostonCream < Doughnut {}
+            |BostonCream().cook();
+            |""".trimMargin()
+        val tokens = Scanner(source).scanTokens()
+        val statements = Parser(tokens).parse()
+        resolver.resolve(statements)
+        interpreter.interpret(statements)
+
+        outputTester.takeAndAssertOutput("Fry until golden brown.")
+    }
+
+    @Test
+    fun `inheritance - can call superclass method`() {
+        val source = """
+            |class Doughnut {
+            |  cook() {
+            |    print "Fry until golden brown.";
+            |  }
+            |}
+            |class BostonCream < Doughnut {
+            |  cook() {
+            |    super.cook();
+            |    print "Pipe full of custard and coat with chocolate.";
+            |  }
+            |}
+            |BostonCream().cook();
+            |""".trimMargin()
+        val tokens = Scanner(source).scanTokens()
+        val statements = Parser(tokens).parse()
+        resolver.resolve(statements)
+        interpreter.interpret(statements)
+
+        outputTester.takeAndAssertOutput("Fry until golden brown.")
+        outputTester.takeAndAssertOutput("Pipe full of custard and coat with chocolate.")
+    }
+
+    @Test
+    fun `self-inhertance is disallowed`() {
+        val source = """
+            |class Oops < Oops {}
+            |""".trimMargin()
+        val tokens = Scanner(source).scanTokens()
+        val statements = Parser(tokens).parse()
+        resolver.resolve(statements)
+        interpreter.interpret(statements)
+
+        assertTrue(Lox.hadError)
+        outputTester.takeAndAssertOutput(
+            "[line 1] Error at 'Oops': A class can't inherit from itself."
+        )
+    }
+
+    @Test
+    fun `inhertance from non-class is disallowed`() {
+        val source = """
+            |var NotAClass = "I am totally not a class";
+            |class Subclass < NotAClass {}
+            |""".trimMargin()
+        val tokens = Scanner(source).scanTokens()
+        val statements = Parser(tokens).parse()
+        resolver.resolve(statements)
+        interpreter.interpret(statements)
+
+        assertTrue(Lox.hadRuntimeError)
+        outputTester.takeAndAssertOutput("Superclass must be a class.")
+    }
+
+    @Test
+    fun `invalid use of super - not in a subclass`() {
+        val source = """
+            |class Eclair {
+            |  cook() {
+            |    super.cook();
+            |    print "Pipe full of crème pâtissière.";
+            |  }
+            |}
+            |""".trimMargin()
+        val tokens = Scanner(source).scanTokens()
+        val statements = Parser(tokens).parse()
+        resolver.resolve(statements)
+        interpreter.interpret(statements)
+
+        assertTrue(Lox.hadRuntimeError)
+        outputTester.takeAndAssertOutput("[line 3] Error at 'super': Can't use 'super' in a class with no superclass.")
+    }
+
+    @Test
+    fun `invalid use of super - outside a class`() {
+        val source = """
+            |super.notEvenInAClass();
+            |""".trimMargin()
+        val tokens = Scanner(source).scanTokens()
+        val statements = Parser(tokens).parse()
+        resolver.resolve(statements)
+        interpreter.interpret(statements)
+
+        assertTrue(Lox.hadRuntimeError)
+        outputTester.takeAndAssertOutput("[line 1] Error at 'super': Can't use 'super' outside of a class.")
     }
 }

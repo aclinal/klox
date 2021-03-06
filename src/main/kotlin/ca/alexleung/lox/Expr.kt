@@ -11,6 +11,7 @@ sealed class Expr {
         fun visit(expr: Literal): R
         fun visit(expr: Logical): R
         fun visit(expr: Set): R
+        fun visit(expr: Super): R
         fun visit(expr: This): R
         fun visit(expr: Unary): R
         fun visit(expr: Variable): R
@@ -26,6 +27,7 @@ sealed class Expr {
             is Literal -> visitor.visit(this)
             is Logical -> visitor.visit(this)
             is Set -> visitor.visit(this)
+            is Super -> visitor.visit(this)
             is This -> visitor.visit(this)
             is Unary -> visitor.visit(this)
             is Variable -> visitor.visit(this)
@@ -55,6 +57,9 @@ sealed class Expr {
 
     // A property set expression (e.g., foo.bar = "foobar").
     data class Set(val obj: Expr, val name: Token, val value: Expr) : Expr()
+
+    // The "super" expression, used to access the superclass.
+    data class Super(val keyword: Token, val method: Token) : Expr()
 
     // The "this" expression, used inside classes.
     data class This(val keyword: Token) : Expr()

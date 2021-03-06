@@ -20,6 +20,8 @@ class AstPrinter : Expr.Visitor<String> {
 
     override fun visit(expr: Expr.Set) = "(= ${expr.obj.accept(this)}.${expr.name.lexeme} ${expr.value.accept(this)})"
 
+    override fun visit(expr: Expr.Super) = "${expr.keyword}.${expr.method}"
+
     override fun visit(expr: Expr.This) = "${expr.keyword}"
 
     override fun visit(expr: Expr.Unary) = parenthesize(expr.operator.lexeme, expr.right)

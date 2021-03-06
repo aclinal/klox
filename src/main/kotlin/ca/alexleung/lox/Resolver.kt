@@ -19,7 +19,8 @@ class Resolver(
 
     private enum class ClassType {
         NONE,
-        CLASS
+        CLASS,
+        SUBCLASS
     }
 
     fun resolve(statements: List<Stmt>) {
@@ -75,6 +76,15 @@ class Resolver(
         resolve(expr.obj)
     }
 
+    override fun visit(expr: Expr.Super) {
+        if (currentClass == ClassType.NONE) {
+            Lox.error(expr.keyword, "Can't use 'super' outside of a class.")
+        } else if (currentClass != ClassType.SUBCLASS) {
+            Lox.error(expr.keyword, "Can't use 'super' in a class with no superclass.")
+        }
+        resolveLocal(expr, expr.keyword)
+    }
+
     override fun visit(expr: Expr.This) {
         if (currentClass == ClassType.NONE) {
             Lox.error(expr.keyword, "Can't use 'this' outside of a class.")
@@ -110,6 +120,19 @@ class Resolver(
             declare(stmt.name)
             define(stmt.name)
 
+            stmt.superclass?.let {
+                if (stmt.name.lexeme == it.name.lexeme) {
+                    Lox.error(stmt.superclass.name, "A class can't inherit from itself.")
+                }
+                currentClass = ClassType.SUBCLASS
+                resolve(it)
+            }
+
+            if (stmt.superclass != null) {
+                beginScope()
+                scopes.last()["super"] = true
+            }
+
             beginScope()
             scopes.last()["this"] = true
             for (method in stmt.methods) {
@@ -120,6 +143,10 @@ class Resolver(
                 resolveFunction(method, declaration)
             }
             endScope()
+
+            if (stmt.superclass != null) {
+                endScope()
+            }
         } finally {
             currentClass = enclosingClass
         }
@@ -138,8 +165,8 @@ class Resolver(
     override fun visit(stmt: Stmt.If) {
         resolve(stmt.condition)
         resolve(stmt.thenBranch)
-        if (stmt.elseBranch != null) {
-            resolve(stmt.elseBranch)
+        stmt.elseBranch?.let {
+            resolve(it)
         }
     }
 
@@ -152,11 +179,11 @@ class Resolver(
             Lox.error(stmt.keyword, "Can't return from top-level code.")
         }
 
-        if (stmt.value != null) {
+        stmt.value?.let {
             if (currentFunction == FunctionType.INITIALIZER) {
-                Lox.error(stmt.keyword, "Can't return a value from an initializer")
+                Lox.error(stmt.keyword, "Can't return a value from an initializer.")
             }
-            resolve(stmt.value)
+            resolve(it)
         }
     }
 
@@ -165,8 +192,8 @@ class Resolver(
 
         // Resolve the initializer to handle cases where the
         // local variable refers to variables with the same name.
-        if (stmt.initializer != null) {
-            resolve(stmt.initializer)
+        stmt.initializer?.let {
+            resolve(it)
         }
 
         define(stmt.name)

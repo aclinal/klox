@@ -32,7 +32,7 @@ sealed class Stmt {
     data class Block(val statements: List<Stmt>) : Stmt()
 
     // A class statement with associated methods (e.g., class Foo { myMethod() { ... } }).
-    data class Class(val name: Token, val methods: List<Function>) : Stmt()
+    data class Class(val name: Token, val superclass: Expr.Variable?, val methods: List<Function>) : Stmt()
 
     // An expression statement (e.g., 4 + 8;).
     data class Expression(val expr: Expr) : Stmt()
